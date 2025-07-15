@@ -1,0 +1,15 @@
+# Directories
+.vs/
+.vscode
+bin/
+bin-int/
+
+# Files
+*.user
+*.vcxproj
+*.filters
+*.sln
+
+# Includes
+!vendor/bin
+Application/imgui.ini
