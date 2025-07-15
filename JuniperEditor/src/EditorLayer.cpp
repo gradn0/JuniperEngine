@@ -1,4 +1,5 @@
 #include <imgui/imgui.h>
+#include "glm/glm.hpp"
 #include "EditorLayer.h"
 #include "Panels.h"
 
@@ -6,12 +7,20 @@ namespace Juniper {
 
 	EditorLayer::EditorLayer() :
 		Layer("Editor Layer"),
-		m_App(Application::Get())
+		m_App(Application::Get()),
+		m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 	}
 
 	bool EditorLayer::OnKeyPress(KeyPressEvent& event)
 	{
+		// Toggle cursor
+		if (event.Key == JP_KEY_LEFT_ALT)
+		{
+			m_App.GetWindow().ToggleCursorDisabled();
+			m_HasCameraUpdated = false;
+		}
+
 		return true;
 	}
 
@@ -29,6 +38,8 @@ namespace Juniper {
 
 	void EditorLayer::OnAttach()
 	{
+		m_Shader = std::make_shared<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
+		m_Quad = Primitives::Quad(glm::vec4(1.0f));
 	}
 
 	void EditorLayer::OnUpdate(float dt)
@@ -37,6 +48,12 @@ namespace Juniper {
 
 		Renderer::SetClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		Renderer::Clear();
+
+		m_Shader->Bind();
+		m_Shader->setUniformMat4("u_ViewProjection", m_Camera.GetViewProjectionMatrix());
+		m_Shader->setUniformMat4("u_Model", glm::mat4(1.0f));
+
+		Renderer::DrawIndexed(*m_Quad, *m_Shader);
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -46,6 +63,17 @@ namespace Juniper {
 
 	void EditorLayer::updateCamera(float dt)
 	{
-	}
+		if (!m_App.GetWindow().IsCursorDisabled()) return;
 
+		float inc = m_CameraSpeed * dt;
+
+		if (Input::IsKeyPressed(JP_KEY_W))
+			m_Camera.Translate(glm::vec3(0.0f, 1.0f, 0.0f) * inc);
+		if (Input::IsKeyPressed(JP_KEY_A))
+			m_Camera.Translate(glm::vec3(1.0f, 0.0f, 0.0f) * -inc);
+		if (Input::IsKeyPressed(JP_KEY_S))
+			m_Camera.Translate(glm::vec3(0.0f, 1.0f, 0.0f) * -inc);
+		if (Input::IsKeyPressed(JP_KEY_D))
+			m_Camera.Translate(glm::vec3(1.0f, 0.0f, 0.0f) * inc);
+	}
 }

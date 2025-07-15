@@ -29,12 +29,12 @@ namespace Juniper {
 
 	void VertexArray::AttachVertexBuffer(const VertexBuffer& vertexBuffer)
 	{
-		m_VertexBuffer = &vertexBuffer;
+		m_VertexBuffer = std::make_shared<VertexBuffer>(vertexBuffer);
 	}
 
 	void VertexArray::AttachIndexBuffer(const IndexBuffer& indexBuffer)
 	{
-		m_IndexBuffer = &indexBuffer;
+		m_IndexBuffer = std::make_shared<IndexBuffer>(indexBuffer);
 		glVertexArrayElementBuffer(m_Id, indexBuffer.GetId());
 	}
 

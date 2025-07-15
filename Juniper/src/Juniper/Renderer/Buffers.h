@@ -72,8 +72,8 @@ namespace Juniper {
 
 	private:
 		uint32_t m_Id = 0;
-		const VertexBuffer* m_VertexBuffer = nullptr;
-		const IndexBuffer* m_IndexBuffer = nullptr;
+		std::shared_ptr<VertexBuffer> m_VertexBuffer;
+		std::shared_ptr<IndexBuffer> m_IndexBuffer;
 	};
 
 	class UniformBuffer
