@@ -1,0 +1,12 @@
+[submodule "Juniper/vendor/spdlog"]
+	path = Juniper/vendor/spdlog
+	url = https://github.com/gabime/spdlog
+[submodule "Juniper/vendor/glfw"]
+	path = Juniper/vendor/glfw
+	url = https://github.com/gradn0/glfw.git
+[submodule "Juniper/vendor/imgui"]
+	path = Juniper/vendor/imgui
+	url = https://github.com/gradn0/imgui
+[submodule "Juniper/vendor/glm"]
+	path = Juniper/vendor/glm
+	url = https://github.com/g-truc/glm.git

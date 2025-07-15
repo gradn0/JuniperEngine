@@ -48,17 +48,17 @@ project "Juniper"
     -- Systems
     filter "system:windows"
         systemversion "latest"
-        defines { "MP_PLATFORM_WINDOWS", "MP_BUILD_DLL" }
+        defines { "JP_PLATFORM_WINDOWS", "JP_BUILD_DLL" }
         buildoptions { "/utf-8" }
 
     -- Configurations
     filter "configurations:Debug"
-        defines { "MP_DEBUG", "MP_ASSERTS", "GLFW_INCLUDE_NONE" }
+        defines { "JP_DEBUG", "JP_ASSERTS", "GLFW_INCLUDE_NONE" }
         runtime "Debug"
         symbols "on"
 
     filter "configurations:Release"
-        defines { "MP_RELEASE", "GLFW_INCLUDE_NONE" } 
+        defines { "JP_RELEASE", "GLFW_INCLUDE_NONE" } 
         runtime "Release"
         optimize "on"
 
@@ -93,16 +93,16 @@ project "Application"
     filter "system:windows"
         staticruntime "On"
         systemversion "latest"
-        defines { "MP_PLATFORM_WINDOWS", "GLFW_INCLUDE_NONE" }
+        defines { "JP_PLATFORM_WINDOWS", "GLFW_INCLUDE_NONE" }
         buildoptions { "/utf-8" }
 
     filter "configurations:Debug"
-        defines { "MP_DEBUG", "MP_ASSERTS" }
+        defines { "JP_DEBUG", "JP_ASSERTS" }
         runtime "Debug"
         symbols "on"
 
     filter "configurations:Release"
-        defines { "MP_RELEASE", "GLFW_INCLUDE_NONE" }
+        defines { "JP_RELEASE", "GLFW_INCLUDE_NONE" }
         runtime "Release"
         optimize "on"
 
@@ -133,15 +133,15 @@ project "JuniperEditor"
     filter "system:windows"
         staticruntime "On"
         systemversion "latest"
-        defines { "MP_PLATFORM_WINDOWS", "GLFW_INCLUDE_NONE" }
+        defines { "JP_PLATFORM_WINDOWS", "GLFW_INCLUDE_NONE" }
         buildoptions { "/utf-8" }
 
     filter "configurations:Debug"
-        defines { "MP_DEBUG", "MP_ASSERTS" }
+        defines { "JP_DEBUG", "JP_ASSERTS" }
         runtime "Debug"
         symbols "on"
 
     filter "configurations:Release"
-        defines { "MP_RELEASE", "GLFW_INCLUDE_NONE" }
+        defines { "JP_RELEASE", "GLFW_INCLUDE_NONE" }
         runtime "Release"
         optimize "on"
