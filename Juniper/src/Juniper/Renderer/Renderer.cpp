@@ -6,8 +6,6 @@
 
 namespace Juniper {
 
-	Renderer* Renderer::s_Instance = nullptr;
-
 	void Renderer::Init()
 	{
 		// Initialise opengl
@@ -39,6 +37,11 @@ namespace Juniper {
 		vertexArray.Bind();
 		shader.Bind();
 		glDrawElements(GL_TRIANGLES, vertexArray.GetIndexCount(), GL_UNSIGNED_INT, 0);
+	}
+
+	void Renderer::OnWindowResize(size_t width, size_t height)
+	{
+		glViewport(0, 0, width, height);
 	}
 
 	void GLAPIENTRY Renderer::MessageCallback(

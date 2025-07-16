@@ -51,6 +51,9 @@ namespace Juniper {
 	{
 		EventDispatcher dispatcher(e);
 
+		dispatcher.Dispatch<WindowCloseEvent>(JP_BIND_HANDLER(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(JP_BIND_HANDLER(Application::OnWindowResize));
+
 		// Handle close event
 		dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent& e) {
 			m_IsRunning = false;
@@ -90,6 +93,18 @@ namespace Juniper {
 	Application& Application::Get()
 	{
 		return *s_Instance;
+	}
+
+	bool Application::OnWindowClose(WindowCloseEvent& e)
+	{
+		m_IsRunning = false;
+		return true;
+	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		Renderer::OnWindowResize(e.Width, e.Height);
+		return false;
 	}
 
 }

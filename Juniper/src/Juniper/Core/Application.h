@@ -37,6 +37,9 @@ namespace Juniper {
 		float m_LastFrameTime = 0.0f;
 
 		static Application* s_Instance;
+
+		bool OnWindowClose(WindowCloseEvent& e);
+		bool OnWindowResize(WindowResizeEvent& e);
 	};
 
 	// Defined in client

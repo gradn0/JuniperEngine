@@ -13,17 +13,17 @@ namespace Juniper {
 	class Renderer
 	{
 	public:
-		static Renderer& Get() { return *s_Instance; }
-
 		static void Init();
+
 		static void SetClearColor(float r, float g, float b, float a);
 		static void Clear();
 		static void SetDepthMask(bool enabled);
 
 		static void DrawIndexed(const VertexArray& vertexArray, const Shader& shader);
 
+		static void OnWindowResize(size_t width, size_t height);
+
 	private:
-		static Renderer* s_Instance;
 
 		static void GLAPIENTRY MessageCallback(
 			GLenum source,

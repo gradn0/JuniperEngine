@@ -3,9 +3,11 @@
 #include "Juniper/Core/Log.h"
 #include "glm/gtc/matrix_transform.hpp"
 
-Juniper::OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top) :
-	m_ProjectionMatrix(glm::ortho(left, right, bottom, top, -1.0f, 1.0f))
+Juniper::OrthographicCamera::OrthographicCamera(float aspectRatio, float zoom) :
+	m_AspectRatio(aspectRatio),
+	m_Zoom(zoom)
 {
+	CalculateProjectionMatrix();
 	CalculateViewMatrix();
 }
 
@@ -29,6 +31,12 @@ void Juniper::OrthographicCamera::SetRotation(float degrees)
 
 void Juniper::OrthographicCamera::SetZoom(float zoom)
 {
+	if (zoom < 0.1f)
+		zoom = 0.1f;
+
+	m_Zoom = zoom;
+	CalculateProjectionMatrix();
+	CalculateViewMatrix();
 }
 
 void Juniper::OrthographicCamera::CalculateViewMatrix()
@@ -38,4 +46,9 @@ void Juniper::OrthographicCamera::CalculateViewMatrix()
 		glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0, 0, 1));
 	m_ViewMatrix = glm::inverse(transform);
 	m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+}
+
+void Juniper::OrthographicCamera::CalculateProjectionMatrix()
+{
+	m_ProjectionMatrix = glm::ortho(-m_AspectRatio * m_Zoom, m_AspectRatio * m_Zoom, -m_Zoom, m_Zoom, -1.0f, 1.0f);
 }
