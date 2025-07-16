@@ -47,51 +47,6 @@ namespace Juniper {
 		glGenerateTextureMipmap(m_Id);
 		stbi_image_free(data);
 	}
-
-	TextureCube::TextureCube(const std::vector<std::string>& faces)
-	{
-		if (faces.size() != 6)
-		{
-			JP_CORE_ERROR("TextureCube requires 6 faces.");
-			return;
-		}
-
-		// Load first face to get metadata
-		stbi_uc* firstFace = LoadTexture(faces[0], m_Width, m_Height, m_Channels, false);
-		if (!firstFace)
-			return;
-
-		auto [internalFormat, format] = GetImageFormat(m_Channels);
-		stbi_image_free(firstFace);
-
-		// Create cubemap texture
-		glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &m_Id);
-		glTextureStorage2D(m_Id, 1, internalFormat, m_Width, m_Height);
-
-		// Upload faces to the cube map
-		for (uint32_t i = 0; i < 6; ++i)
-		{
-			stbi_uc* data = LoadTexture(faces[i], m_Width, m_Height, m_Channels, false);
-			if (!data)
-				continue;
-			
-			glTextureSubImage3D(
-				m_Id, 0, 0, 0, i,
-				m_Width, m_Height, 1,
-				format, GL_UNSIGNED_BYTE, data
-			);
-
-			stbi_image_free(data);
-		}
-
-		// Set parameters
-		glTextureParameteri(m_Id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(m_Id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTextureParameteri(m_Id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(m_Id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTextureParameteri(m_Id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	}
-
 }
 
 namespace Juniper {

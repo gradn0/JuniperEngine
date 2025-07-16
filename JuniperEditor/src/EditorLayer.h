@@ -28,6 +28,7 @@ namespace Juniper {
 
 		std::shared_ptr<Shader> m_Shader;
 		std::shared_ptr<VertexArray> m_Quad;
+		std::shared_ptr<Texture2D> m_Texture;
 
 		void updateCamera(float dt); 
 	};

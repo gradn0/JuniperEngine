@@ -17,7 +17,7 @@ namespace Juniper {
 		inline glm::vec3 GetPosition() const { return m_Position; }
 		inline float GetRotation() const { return m_Rotation; }
 		inline float GetZoom() const { return m_Zoom; }
-		const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
+		inline const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
 
 		void Translate(const glm::vec3& translation);
 

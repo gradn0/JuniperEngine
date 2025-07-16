@@ -40,6 +40,8 @@ namespace Juniper {
 	{
 		m_Shader = std::make_shared<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
 		m_Quad = Primitives::Quad(glm::vec4(1.0f));
+		m_Texture = std::make_shared<Texture2D>("res/textures/leaf.jpg");
+		m_Texture->Bind();
 	}
 
 	void EditorLayer::OnUpdate(float dt)
@@ -52,6 +54,7 @@ namespace Juniper {
 		m_Shader->Bind();
 		m_Shader->setUniformMat4("u_ViewProjection", m_Camera.GetViewProjectionMatrix());
 		m_Shader->setUniformMat4("u_Model", glm::mat4(1.0f));
+		m_Shader->setUniform1i("u_Texture", 0);
 
 		Renderer::DrawIndexed(*m_Quad, *m_Shader);
 	}

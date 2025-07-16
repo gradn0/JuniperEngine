@@ -26,11 +26,4 @@ namespace Juniper {
 		Texture2D(const std::string& filepath, bool flip = true);
 	};
 
-	class TextureCube : public Texture
-	{
-	public:
-		// TODO: Allow single file cubemaps
-		TextureCube(const std::vector<std::string>& faces);
-	};
-
 }
