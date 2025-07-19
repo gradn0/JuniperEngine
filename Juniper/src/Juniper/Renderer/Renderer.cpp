@@ -5,10 +5,15 @@
 
 namespace Juniper {
 
-	constexpr size_t MaxQuads = 1000;
-	constexpr size_t MaxVertices = MaxQuads * 4;
-	constexpr size_t MaxIndices = MaxQuads * 6;
-	constexpr size_t MaxTextures = 32;
+	constexpr uint32_t MaxQuads = 1000;
+	constexpr uint32_t MaxVertices = MaxQuads * 4;
+	constexpr uint32_t MaxIndices = MaxQuads * 6;
+	constexpr uint32_t MaxTextures = 32;
+
+	struct Capabilities
+	{
+		int TextureSlots = 32;
+	};
 
 	struct QuadVertex
 	{
@@ -30,12 +35,13 @@ namespace Juniper {
 		std::shared_ptr<Texture2D> Textures[MaxTextures];
 		int32_t slots[MaxTextures];
 
-		size_t VertexPtr;
-		size_t IndexPtr;
-		size_t TexturesPtr;
+		uint32_t VertexPtr = 0;
+		uint32_t IndexPtr = 0;
+		uint32_t TexturesPtr = 0;
 	};
 
 	static Data s_Data;
+	static Capabilities s_Capabilities;
 
 	void Renderer::Init()
 	{
@@ -47,8 +53,11 @@ namespace Juniper {
 
 		glEnable(GL_DEPTH_TEST);
 
+		// Query capabilities
+		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &s_Capabilities.TextureSlots);
+
 		// Init data
-		auto vbo = std::make_shared<VertexBuffer>(MaxVertices * sizeof(QuadVertex));
+		auto vbo = std::make_shared<VertexBuffer>(static_cast<uint32_t>(MaxVertices * sizeof(QuadVertex)));
 		auto ibo = std::make_shared<IndexBuffer>(MaxIndices);
 
 		s_Data.Vao = std::make_shared<VertexArray>();
@@ -65,7 +74,7 @@ namespace Juniper {
 		s_Data.Textures[0] = s_Data.DefaultTexture;
 
         // Initialise sampler array to be sent to the shader
-		for (size_t i = 0; i < MaxTextures; i++)
+		for (int32_t i = 0; i < MaxTextures; i++)
 			s_Data.slots[i] = i;
 	}
 
@@ -74,14 +83,19 @@ namespace Juniper {
 		s_Data.ViewProjection = camera.GetViewProjectionMatrix();
 		s_Data.Shader = shader;
 
-		s_Data.VertexPtr = 0;
-		s_Data.IndexPtr = 0;
-		s_Data.TexturesPtr = 1;
+		ResetBatch();
 
 		s_Data.Shader->Bind();
 		s_Data.Shader->setUniformMat4("u_ViewProjection", s_Data.ViewProjection);
 		s_Data.Shader->setUniformMat4("u_Model", glm::mat4(1.0f));
-		s_Data.Shader->setUniformArrayi("u_Textures", MaxTextures, s_Data.slots);
+		s_Data.Shader->setUniformArrayi("u_Textures", static_cast<int>(MaxTextures), s_Data.slots);
+	}
+
+	void Renderer::ResetBatch()
+	{
+		s_Data.VertexPtr = 0;
+		s_Data.IndexPtr = 0;
+		s_Data.TexturesPtr = 1;
 	}
 
 	void Renderer::EndScene()
@@ -92,7 +106,7 @@ namespace Juniper {
 	void Renderer::Flush()
 	{
         // Bind shaders
-		for (size_t i = 0; i < s_Data.TexturesPtr; i++)
+		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
 			s_Data.Textures[i]->Bind(i);
 
         // Set buffer data
@@ -109,22 +123,39 @@ namespace Juniper {
 
 	void Renderer::SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color, const std::shared_ptr<Texture2D>& texture)
 	{
-		float textureSlot = 0;
-		bool found = false;
-		for (size_t i = 0; i < s_Data.TexturesPtr; i++)
+		int existingSlot = -1;
+		float textureSlot = 0.0f;
+
+		// Check if texture has already been used this batch
+		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
 		{
 			if (s_Data.Textures[i] == texture)
 			{
-				textureSlot = static_cast<float>(i);
-				found = true;
+				existingSlot = i;
 				break;
 			}
 		}
 
-		if (!found)
+		// Check whether an early flush is required
+		bool needNewTextureSlot = (existingSlot == -1);
+		bool textureLimitReached = s_Data.TexturesPtr >= std::min<uint32_t>(static_cast<uint32_t>(s_Capabilities.TextureSlots), MaxTextures);
+		bool bufferLimitReached = s_Data.VertexPtr + 4 > MaxVertices || s_Data.IndexPtr + 6 > MaxIndices;
+
+		if ((needNewTextureSlot && textureLimitReached) || bufferLimitReached)
+		{
+			Flush();
+			ResetBatch();
+			existingSlot = -1;
+		}
+
+		if (existingSlot == -1)
 		{
 			s_Data.Textures[s_Data.TexturesPtr] = texture;
-			textureSlot = s_Data.TexturesPtr++;
+			textureSlot = static_cast<float>(s_Data.TexturesPtr++);
+		}
+		else
+		{
+			textureSlot = static_cast<float>(existingSlot);
 		}
 
 		QuadVertex vertex{};
@@ -172,7 +203,7 @@ namespace Juniper {
 	{
 		vertexArray.Bind();
 		shader.Bind();
-		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, static_cast<int>(indexCount), GL_UNSIGNED_INT, 0);
 	}
 
 	void Renderer::DrawIndexed(const VertexArray& vertexArray, const Shader& shader)
@@ -195,7 +226,7 @@ namespace Juniper {
 		glDepthMask(enabled);
 	}
 
-	void Renderer::OnWindowResize(size_t width, size_t height)
+	void Renderer::OnWindowResize(int width, int height)
 	{
 		glViewport(0, 0, width, height);
 	}

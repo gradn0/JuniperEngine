@@ -40,7 +40,8 @@ namespace Juniper {
 	{
 		m_Shader = std::make_shared<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
 		m_Quad = Primitives::Quad(glm::vec4(1.0f));
-		m_Texture = std::make_shared<Texture2D>("res/textures/leaf.jpg");
+		m_TextureLeaf = std::make_shared<Texture2D>("res/textures/leaf.jpg");
+		m_TextureStone = std::make_shared<Texture2D>("res/textures/stone.jpg");
 	}
 
 	void EditorLayer::OnUpdate(float dt)
@@ -52,8 +53,14 @@ namespace Juniper {
 
 		Renderer::BeginScene(m_Camera, m_Shader);
 
-		Renderer::SubmitQuad({ 5.0f, 5.0f, 0.0f }, { 5.0f, 5.0f }, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 5.0f, 5.0f }, glm::vec4(1.0f), m_Texture);
+		for (size_t y = 0; y < 25; y++)
+		{
+			for (size_t x = 0; x < 25; x++)
+			{
+				auto texture = (x + y) % 2 == 0 ? m_TextureLeaf : m_TextureStone;
+				Renderer::SubmitQuad({ x * 5.0f, y* 5.0f, 0.0f }, { 5.0f, 5.0f }, glm::vec4(1.0f), texture);
+			}
+		}
 
 		Renderer::EndScene();
 	}

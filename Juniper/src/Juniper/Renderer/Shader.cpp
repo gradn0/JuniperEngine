@@ -82,7 +82,7 @@ namespace Juniper {
 		glUniform1i(getUniformLocation(name), value);
 	}
 
-	void Shader::setUniformArrayi(const std::string& name, size_t count, const int* values) const
+	void Shader::setUniformArrayi(const std::string& name, int count, const int* values) const
 	{
 		glUniform1iv(getUniformLocation(name), count, values);
 	}

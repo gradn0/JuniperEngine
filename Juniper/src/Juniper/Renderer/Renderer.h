@@ -31,9 +31,10 @@ namespace Juniper {
 		static void DrawIndexed(const VertexArray& vertexArray, size_t indexCount, const Shader& shader);
 		static void DrawIndexed(const VertexArray& vertexArray, const Shader& shader);
 
-		static void OnWindowResize(size_t width, size_t height);
+		static void OnWindowResize(int width, int height);
 
 	private:
+		static void ResetBatch();
 
 		static void GLAPIENTRY MessageCallback(
 			GLenum source,
