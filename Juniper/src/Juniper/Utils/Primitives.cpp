@@ -28,8 +28,8 @@ namespace Juniper { namespace Primitives {
 		auto vbo = std::make_shared<VertexBuffer>(vertices.data(), static_cast<uint32_t>(vertices.size() * sizeof(Vertex)));
 		auto ibo = std::make_shared<IndexBuffer>(indices.data(), static_cast<uint32_t>(indices.size()));
 
-		vao->AttachVertexBuffer(*vbo);
-		vao->AttachIndexBuffer(*ibo);
+		vao->AttachVertexBuffer(vbo);
+		vao->AttachIndexBuffer(ibo);
 		vao->SetVertexLayout({
 			{ 3, AttributeType::Float, false },
 			{ 4, AttributeType::Float, false },

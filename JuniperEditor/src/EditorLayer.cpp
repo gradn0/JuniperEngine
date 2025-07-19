@@ -8,7 +8,7 @@ namespace Juniper {
 	EditorLayer::EditorLayer() :
 		Layer("Editor Layer"),
 		m_App(Application::Get()),
-		m_Camera(1.6f / 0.9f, 1.0f)
+		m_Camera(1.6f / 0.9f, 10.0f)
 	{
 	}
 
@@ -41,7 +41,6 @@ namespace Juniper {
 		m_Shader = std::make_shared<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
 		m_Quad = Primitives::Quad(glm::vec4(1.0f));
 		m_Texture = std::make_shared<Texture2D>("res/textures/leaf.jpg");
-		m_Texture->Bind();
 	}
 
 	void EditorLayer::OnUpdate(float dt)
@@ -51,12 +50,12 @@ namespace Juniper {
 		Renderer::SetClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		Renderer::Clear();
 
-		m_Shader->Bind();
-		m_Shader->setUniformMat4("u_ViewProjection", m_Camera.GetViewProjectionMatrix());
-		m_Shader->setUniformMat4("u_Model", glm::mat4(1.0f));
-		m_Shader->setUniform1i("u_Texture", 0);
+		Renderer::BeginScene(m_Camera, m_Shader);
 
-		Renderer::DrawIndexed(*m_Quad, *m_Shader);
+		Renderer::SubmitQuad({ 5.0f, 5.0f, 0.0f }, { 5.0f, 5.0f }, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 5.0f, 5.0f }, glm::vec4(1.0f), m_Texture);
+
+		Renderer::EndScene();
 	}
 
 	void EditorLayer::OnImGuiRender()

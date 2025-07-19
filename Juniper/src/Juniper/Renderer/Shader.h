@@ -18,6 +18,7 @@ namespace Juniper {
 		void BindUniformBlock(const std::string& name, uint32_t slot = 0) const;
 
 		void setUniform1i(const std::string& name, int value) const;
+		void setUniformArrayi(const std::string& name, size_t count, const int* data) const;
 
 		void setUniform1f(const std::string& name, float value) const;
 		void setUniform2f(const std::string& name, const glm::vec2& value) const;

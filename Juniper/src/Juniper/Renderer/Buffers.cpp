@@ -27,15 +27,15 @@ namespace Juniper {
 		return m_IndexBuffer->GetIndexCount();
 	}
 
-	void VertexArray::AttachVertexBuffer(const VertexBuffer& vertexBuffer)
+	void VertexArray::AttachVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
 	{
-		m_VertexBuffer = std::make_shared<VertexBuffer>(vertexBuffer);
+		m_VertexBuffer = vertexBuffer;
 	}
 
-	void VertexArray::AttachIndexBuffer(const IndexBuffer& indexBuffer)
+	void VertexArray::AttachIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
 	{
-		m_IndexBuffer = std::make_shared<IndexBuffer>(indexBuffer);
-		glVertexArrayElementBuffer(m_Id, indexBuffer.GetId());
+		m_IndexBuffer = indexBuffer;
+        glVertexArrayElementBuffer(m_Id, indexBuffer->GetId());
 	}
 
 	void VertexArray::SetVertexLayout(const std::vector<VertexAttribute>& attributes)
@@ -77,7 +77,18 @@ namespace Juniper {
 	VertexBuffer::VertexBuffer(const void* data, uint32_t size)
 	{
 		glCreateBuffers(1, &m_Id);
-		glNamedBufferStorage(m_Id, size, data, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(m_Id, size, data, 0);
+	}
+
+	VertexBuffer::VertexBuffer(uint32_t size)
+	{
+		glCreateBuffers(1, &m_Id);
+		glNamedBufferStorage(m_Id, size, nullptr, GL_DYNAMIC_STORAGE_BIT);
+	}
+
+	void VertexBuffer::SetData(const void* data, uint32_t size) const
+	{
+		glNamedBufferSubData(m_Id, 0, size, data);
 	}
 
 	VertexBuffer::~VertexBuffer()
@@ -93,12 +104,24 @@ namespace Juniper {
 	{
 		m_IndexCount = count;
 		glCreateBuffers(1, &m_Id);
-		glNamedBufferStorage(m_Id, count * sizeof(uint32_t), indices, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(m_Id, count * sizeof(uint32_t), indices, 0);
+	}
+
+	IndexBuffer::IndexBuffer(uint32_t count)
+	{
+		m_IndexCount = count;
+		glCreateBuffers(1, &m_Id);
+		glNamedBufferStorage(m_Id, count * sizeof(uint32_t), nullptr, GL_DYNAMIC_STORAGE_BIT);
 	}
 
 	IndexBuffer::~IndexBuffer()
 	{
 		glDeleteBuffers(1, &m_Id);
+	}
+
+	void IndexBuffer::SetData(const void* data, uint32_t size) const
+	{
+		glNamedBufferSubData(m_Id, 0, size, data);
 	}
 
 	/**
