@@ -12,6 +12,29 @@
 
 namespace Juniper {
 
+	struct Capabilities
+	{
+		int TextureSlots = 32;
+	};
+
+	struct QuadVertex
+	{
+		glm::vec3 Position;
+		glm::vec4 Color;
+		glm::vec2 TexCoords;
+		float TexIndex;
+	};
+
+	// Supplied to the internal submit method by the public submission api
+	struct QuadSpec
+	{
+		glm::vec3 Position;
+		glm::vec4 Color;
+		glm::vec2 Size;
+		std::array<glm::vec2, 4> TexCoords;
+		std::shared_ptr<Texture2D> Texture;
+	};
+
 	class Renderer
 	{
 	public:
@@ -23,20 +46,21 @@ namespace Juniper {
 
 		static void BeginScene(const OrthographicCamera& camera, const std::shared_ptr<Shader> shader);
 		static void EndScene();
-		static void Flush();
 
 		static void SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color);
-		static void SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color, const std::shared_ptr<Texture2D>& texture);
-
-		static void DrawIndexed(const VertexArray& vertexArray, size_t indexCount, const Shader& shader);
-		static void DrawIndexed(const VertexArray& vertexArray, const Shader& shader);
+		static void SubmitQuad(glm::vec3 position, glm::vec2 size, const std::shared_ptr<Texture2D>& texture);
+		static void SubmitQuad(glm::vec3 position, glm::vec2 size, const std::shared_ptr<SubTexture2D>& texture);
 
 		static void OnWindowResize(int width, int height);
 
 	private:
-		static void ResetBatch();
+		static void resetBatch();
+		static void submitQuad(const QuadSpec& spec);
+		static void flush();
+		static void drawIndexed(const VertexArray& vertexArray, size_t indexCount, const Shader& shader);
+		static void drawIndexed(const VertexArray& vertexArray, const Shader& shader);
 
-		static void GLAPIENTRY MessageCallback(
+		static void GLAPIENTRY messageCallback(
 			GLenum source,
 			GLenum type,
 			GLuint id,

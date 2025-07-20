@@ -4,23 +4,15 @@
 #include "Renderer.h"
 
 namespace Juniper {
-
 	constexpr uint32_t MaxQuads = 1000;
 	constexpr uint32_t MaxVertices = MaxQuads * 4;
 	constexpr uint32_t MaxIndices = MaxQuads * 6;
 	constexpr uint32_t MaxTextures = 32;
-
-	struct Capabilities
-	{
-		int TextureSlots = 32;
-	};
-
-	struct QuadVertex
-	{
-		glm::vec3 Position;
-		glm::vec4 Color;
-		glm::vec2 TexCoords;
-		float TexIndex;
+	constexpr std::array<glm::vec2, 4> DefaultTexCoords = {
+		glm::vec2{0.0f, 0.0f},
+		glm::vec2{1.0f, 0.0f},
+		glm::vec2{1.0f, 1.0f},
+		glm::vec2{0.0f, 1.0f}
 	};
 
 	struct Data
@@ -49,7 +41,7 @@ namespace Juniper {
 		JP_CORE_VERIFY(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress), "Failed to load OpenGL");
 		
 		glEnable(GL_DEBUG_OUTPUT);
-		glDebugMessageCallback(MessageCallback, 0);
+		glDebugMessageCallback(messageCallback, 0);
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -83,7 +75,7 @@ namespace Juniper {
 		s_Data.ViewProjection = camera.GetViewProjectionMatrix();
 		s_Data.Shader = shader;
 
-		ResetBatch();
+		resetBatch();
 
 		s_Data.Shader->Bind();
 		s_Data.Shader->setUniformMat4("u_ViewProjection", s_Data.ViewProjection);
@@ -91,124 +83,42 @@ namespace Juniper {
 		s_Data.Shader->setUniformArrayi("u_Textures", static_cast<int>(MaxTextures), s_Data.slots);
 	}
 
-	void Renderer::ResetBatch()
-	{
-		s_Data.VertexPtr = 0;
-		s_Data.IndexPtr = 0;
-		s_Data.TexturesPtr = 1;
-	}
-
 	void Renderer::EndScene()
 	{
-		Flush();
-	}
-
-	void Renderer::Flush()
-	{
-        // Bind shaders
-		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
-			s_Data.Textures[i]->Bind(i);
-
-        // Set buffer data
-		s_Data.Vao->GetVertexBuffer()->SetData(s_Data.Vertices, s_Data.VertexPtr * sizeof(QuadVertex));
-		s_Data.Vao->GetIndexBuffer()->SetData(s_Data.Indices, s_Data.IndexPtr * sizeof(uint32_t));
-
-		DrawIndexed(*s_Data.Vao, s_Data.IndexPtr, *s_Data.Shader);
+		flush();
 	}
 
 	void Renderer::SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color)
 	{
-		SubmitQuad(position, size, color, s_Data.DefaultTexture);
+		submitQuad({
+			position,
+			color,
+			size,
+			DefaultTexCoords,
+			s_Data.DefaultTexture
+		});
 	}
 
-	void Renderer::SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color, const std::shared_ptr<Texture2D>& texture)
+	void Renderer::SubmitQuad(glm::vec3 position, glm::vec2 size, const std::shared_ptr<Texture2D>& texture)
 	{
-		int existingSlot = -1;
-		float textureSlot = 0.0f;
-
-		// Check if texture has already been used this batch
-		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
-		{
-			if (s_Data.Textures[i] == texture)
-			{
-				existingSlot = i;
-				break;
-			}
-		}
-
-		// Check whether an early flush is required
-		bool needNewTextureSlot = (existingSlot == -1);
-		bool textureLimitReached = s_Data.TexturesPtr >= std::min<uint32_t>(static_cast<uint32_t>(s_Capabilities.TextureSlots), MaxTextures);
-		bool bufferLimitReached = s_Data.VertexPtr + 4 > MaxVertices || s_Data.IndexPtr + 6 > MaxIndices;
-
-		if ((needNewTextureSlot && textureLimitReached) || bufferLimitReached)
-		{
-			Flush();
-			ResetBatch();
-			existingSlot = -1;
-		}
-
-		if (existingSlot == -1)
-		{
-			s_Data.Textures[s_Data.TexturesPtr] = texture;
-			textureSlot = static_cast<float>(s_Data.TexturesPtr++);
-		}
-		else
-		{
-			textureSlot = static_cast<float>(existingSlot);
-		}
-
-		QuadVertex vertex{};
-		auto baseVertex = static_cast<uint32_t>(s_Data.VertexPtr);
-
-		// Bottom Left
-		vertex.Position = { position.x, position.y, position.z };
-		vertex.Color = color;
-		vertex.TexCoords = { 0.0f, 0.0f };
-		vertex.TexIndex = textureSlot;
-		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
-
-		// Bottom Right
-		vertex.Position = { position.x + size.x, position.y, position.z };
-		vertex.Color = color;
-		vertex.TexCoords = { 1.0f, 0.0f };
-		vertex.TexIndex = textureSlot;
-		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
-
-		// Top Right
-		vertex.Position = { position.x + size.x, position.y + size.y, position.z };
-		vertex.Color = color;
-		vertex.TexCoords = { 1.0f, 1.0f };
-		vertex.TexIndex = textureSlot;
-		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
-
-		// Top Left
-		vertex.Position = { position.x, position.y + size.y, position.z };
-		vertex.Color = color;
-		vertex.TexCoords = { 0.0f, 1.0f };
-		vertex.TexIndex = textureSlot;
-		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
-
-		s_Data.Indices[s_Data.IndexPtr + 0] = baseVertex + 0;
-		s_Data.Indices[s_Data.IndexPtr + 1] = baseVertex + 1;
-		s_Data.Indices[s_Data.IndexPtr + 2] = baseVertex + 2;
-		s_Data.Indices[s_Data.IndexPtr + 3] = baseVertex + 2;
-		s_Data.Indices[s_Data.IndexPtr + 4] = baseVertex + 3;
-		s_Data.Indices[s_Data.IndexPtr + 5] = baseVertex + 0;
-
-		s_Data.IndexPtr += 6;
+		submitQuad({
+			position,
+			glm::vec4{ 1.0f },
+			size,
+			DefaultTexCoords,
+			texture
+			});
 	}
 
-	void Renderer::DrawIndexed(const VertexArray& vertexArray, size_t indexCount, const Shader& shader)
+	void Renderer::SubmitQuad(glm::vec3 position, glm::vec2 size, const std::shared_ptr<SubTexture2D>& texture)
 	{
-		vertexArray.Bind();
-		shader.Bind();
-		glDrawElements(GL_TRIANGLES, static_cast<int>(indexCount), GL_UNSIGNED_INT, 0);
-	}
-
-	void Renderer::DrawIndexed(const VertexArray& vertexArray, const Shader& shader)
-	{
-		DrawIndexed(vertexArray, vertexArray.GetIndexCount(), shader);
+		submitQuad({
+			position,
+			glm::vec4{ 1.0f },
+			size,
+			texture->GetTextureCoords(),
+			texture->GetTexture()
+		});
 	}
 
 	void Renderer::SetClearColor(float r, float g, float b, float a)
@@ -230,8 +140,122 @@ namespace Juniper {
 	{
 		glViewport(0, 0, width, height);
 	}
+}
 
-	void GLAPIENTRY Renderer::MessageCallback(
+// Internal
+namespace Juniper {
+
+	void Renderer::submitQuad(const QuadSpec& spec)
+	{
+		int existingSlot = -1;
+		float textureSlot = 0.0f;
+
+		// Check if texture has already been used this batch
+		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
+		{
+			if (s_Data.Textures[i] == spec.Texture)
+			{
+				existingSlot = i;
+				break;
+			}
+		}
+
+		// Check whether an early flush is required
+		bool needNewTextureSlot = (existingSlot == -1);
+		bool textureLimitReached = s_Data.TexturesPtr >= std::min<uint32_t>(static_cast<uint32_t>(s_Capabilities.TextureSlots), MaxTextures);
+		bool bufferLimitReached = s_Data.VertexPtr + 4 > MaxVertices || s_Data.IndexPtr + 6 > MaxIndices;
+
+		if ((needNewTextureSlot && textureLimitReached) || bufferLimitReached)
+		{
+			flush();
+			resetBatch();
+			existingSlot = -1;
+		}
+
+		if (existingSlot == -1)
+		{
+			s_Data.Textures[s_Data.TexturesPtr] = spec.Texture;
+			textureSlot = static_cast<float>(s_Data.TexturesPtr++);
+		}
+		else
+		{
+			textureSlot = static_cast<float>(existingSlot);
+		}
+
+		QuadVertex vertex{};
+		auto baseVertex = static_cast<uint32_t>(s_Data.VertexPtr);
+
+		// Bottom Left
+		vertex.Position = spec.Position;
+		vertex.Color = spec.Color;
+		vertex.TexCoords = spec.TexCoords[0];
+		vertex.TexIndex = textureSlot;
+		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
+
+		// Bottom Right
+		vertex.Position = spec.Position + glm::vec3(spec.Size.x, 0.0f, 0.0f);
+		vertex.Color = spec.Color;
+		vertex.TexCoords = spec.TexCoords[1];
+		vertex.TexIndex = textureSlot;
+		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
+
+		// Top Right
+		vertex.Position = spec.Position + glm::vec3(spec.Size.x, spec.Size.y, 0.0f);
+		vertex.Color = spec.Color;
+		vertex.TexCoords = spec.TexCoords[2];
+		vertex.TexIndex = textureSlot;
+		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
+
+		// Top Left
+		vertex.Position = spec.Position + glm::vec3(0.0f, spec.Size.y, 0.0f);
+		vertex.Color = spec.Color;
+		vertex.TexCoords = spec.TexCoords[3];
+		vertex.TexIndex = textureSlot;
+		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
+
+		s_Data.Indices[s_Data.IndexPtr + 0] = baseVertex + 0;
+		s_Data.Indices[s_Data.IndexPtr + 1] = baseVertex + 1;
+		s_Data.Indices[s_Data.IndexPtr + 2] = baseVertex + 2;
+		s_Data.Indices[s_Data.IndexPtr + 3] = baseVertex + 2;
+		s_Data.Indices[s_Data.IndexPtr + 4] = baseVertex + 3;
+		s_Data.Indices[s_Data.IndexPtr + 5] = baseVertex + 0;
+
+		s_Data.IndexPtr += 6;
+	}
+
+	void Renderer::resetBatch()
+	{
+		s_Data.VertexPtr = 0;
+		s_Data.IndexPtr = 0;
+		s_Data.TexturesPtr = 1;
+	}
+
+	void Renderer::flush()
+	{
+		// Bind shaders
+		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
+			s_Data.Textures[i]->Bind(i);
+
+		// Set buffer data
+		s_Data.Vao->GetVertexBuffer()->SetData(s_Data.Vertices, s_Data.VertexPtr * sizeof(QuadVertex));
+		s_Data.Vao->GetIndexBuffer()->SetData(s_Data.Indices, s_Data.IndexPtr * sizeof(uint32_t));
+
+		drawIndexed(*s_Data.Vao, s_Data.IndexPtr, *s_Data.Shader);
+	}
+
+	void Renderer::drawIndexed(const VertexArray& vertexArray, size_t indexCount, const Shader& shader)
+	{
+		vertexArray.Bind();
+		shader.Bind();
+		glDrawElements(GL_TRIANGLES, static_cast<int>(indexCount), GL_UNSIGNED_INT, 0);
+	}
+
+	void Renderer::drawIndexed(const VertexArray& vertexArray, const Shader& shader)
+	{
+		drawIndexed(vertexArray, vertexArray.GetIndexCount(), shader);
+	}
+
+	void GLAPIENTRY Renderer::messageCallback(
 		GLenum source,
 		GLenum type,
 		GLuint id,

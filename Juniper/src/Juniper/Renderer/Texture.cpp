@@ -31,6 +31,8 @@ namespace Juniper {
 		if (!data)
 			return;
 
+		JP_CORE_TRACE("Loading texture: \"{0}\" ({1}x{2})", filepath, m_Width, m_Height);
+
 		auto [internalFormat, format] = GetImageFormat(m_Channels);
 
 		// Create texture
@@ -39,10 +41,10 @@ namespace Juniper {
 		glTextureSubImage2D(m_Id, 0, 0, 0, m_Width, m_Height, format, GL_UNSIGNED_BYTE, data);
 
 		// Set attributes
-		glTextureParameteri(m_Id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTextureParameteri(m_Id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTextureParameteri(m_Id, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(m_Id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(m_Id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTextureParameteri(m_Id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(m_Id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(m_Id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 		glGenerateTextureMipmap(m_Id);
 		stbi_image_free(data);
@@ -61,6 +63,28 @@ namespace Juniper {
 		glTextureParameteri(m_Id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTextureParameteri(m_Id, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_Id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	SubTexture2D::SubTexture2D(const std::shared_ptr<Texture2D>& parent, glm::vec2 offset, glm::vec2 size, float spriteSize)
+		: m_Parent(parent)
+	{
+		// Calcuate texure coordinates
+		glm::vec2 min{
+			(offset.x * spriteSize) / static_cast<float>(m_Parent->GetWidth()),
+			(offset.y * spriteSize) / static_cast<float>(m_Parent->GetHeight())
+		};
+
+		glm::vec2 max{
+			((offset.x + size.x) * spriteSize) / static_cast<float>(m_Parent->GetWidth()),
+			((offset.y + size.y) * spriteSize) / static_cast<float>(m_Parent->GetHeight())
+		};
+
+		m_TexCoords = {
+			glm::vec2{ min.x, min.y },
+			glm::vec2{ max.x, min.y },
+			glm::vec2{ max.x, max.y },
+			glm::vec2{ min.x, max.y }
+		};
 	}
 }
 

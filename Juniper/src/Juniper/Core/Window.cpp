@@ -19,7 +19,7 @@ namespace Juniper {
 		#endif
 
 		// Initialise window
-		JP_CORE_INFO("Creating Window \"{0}\" ({1} x {2})", m_WindowInfo.Title, m_WindowInfo.Width, m_WindowInfo.Height);
+		JP_CORE_INFO("Creating Window: \"{0}\" ({1}x{2})", m_WindowInfo.Title, m_WindowInfo.Width, m_WindowInfo.Height);
 		m_Window = glfwCreateWindow(m_WindowInfo.Width, m_WindowInfo.Height, m_WindowInfo.Title.c_str(), nullptr, nullptr);
 		JP_CORE_ASSERT(m_Window, "Failed to create window");
 

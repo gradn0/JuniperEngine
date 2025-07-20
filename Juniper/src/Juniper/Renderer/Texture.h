@@ -13,7 +13,10 @@ namespace Juniper {
 		virtual ~Texture();
 
 		void Bind(uint32_t slot = 0) const;
+
 		inline uint32_t GetId() const { return m_Id;  }
+		inline int GetWidth() const { return m_Width; }
+		inline int GetHeight() const { return m_Height; }
 
 		bool operator==(const Texture& other) const { return m_Id == other.GetId(); }
 
@@ -28,6 +31,20 @@ namespace Juniper {
 	public:
 		Texture2D(const std::string& filepath, bool flip = true);
 		Texture2D(glm::u8vec4 color);
+	};
+
+	class SubTexture2D
+	{
+	public:
+		SubTexture2D(const std::shared_ptr<Texture2D>& parent, glm::vec2 offset, glm::vec2 size, float spriteSize);
+		~SubTexture2D() = default;
+
+		std::shared_ptr<Texture2D> GetTexture() const { return m_Parent; }
+		std::array<glm::vec2, 4> GetTextureCoords() const { return m_TexCoords; }
+
+	private:
+		std::shared_ptr<Texture2D> m_Parent;
+		std::array<glm::vec2, 4> m_TexCoords;
 	};
 
 }

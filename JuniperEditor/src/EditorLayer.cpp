@@ -42,6 +42,9 @@ namespace Juniper {
 		m_Quad = Primitives::Quad(glm::vec4(1.0f));
 		m_TextureLeaf = std::make_shared<Texture2D>("res/textures/leaf.jpg");
 		m_TextureStone = std::make_shared<Texture2D>("res/textures/stone.jpg");
+		m_SpritesheetFloor = std::make_shared<Texture2D>("res/textures/floors.png");
+
+		m_Grass = std::make_shared<SubTexture2D>(m_SpritesheetFloor, glm::vec2(0.0f, 4.0f), glm::vec2(5.0f, 5.0f), 16.0f);
 	}
 
 	void EditorLayer::OnUpdate(float dt)
@@ -57,10 +60,14 @@ namespace Juniper {
 		{
 			for (size_t x = 0; x < 25; x++)
 			{
-				auto texture = (x + y) % 2 == 0 ? m_TextureLeaf : m_TextureStone;
-				Renderer::SubmitQuad({ x * 5.0f, y* 5.0f, 0.0f }, { 5.0f, 5.0f }, glm::vec4(1.0f), texture);
+				auto& texture = (x + y) % 2 == 0 ? m_TextureLeaf : m_TextureStone;
+				Renderer::SubmitQuad({ x * 5.0f, y * 5.0f, 0.0f }, { 5.0f, 5.0f }, texture);
 			}
 		}
+
+		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 400.0f, 416.0f }, m_SpritesheetFloor);
+
+		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 80, 80 }, m_Grass);
 
 		Renderer::EndScene();
 	}
