@@ -25,16 +25,6 @@ namespace Juniper {
 		float TexIndex;
 	};
 
-	// Supplied to the internal submit method by the public submission api
-	struct QuadSpec
-	{
-		glm::vec3 Position;
-		glm::vec4 Color;
-		glm::vec2 Size;
-		std::array<glm::vec2, 4> TexCoords;
-		std::shared_ptr<Texture> Texture;
-	};
-
 	class Renderer
 	{
 	public:
@@ -47,13 +37,13 @@ namespace Juniper {
 		static void BeginScene(const OrthographicCamera& camera, const std::shared_ptr<Shader> shader);
 		static void EndScene();
 
-		static void SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color, const std::shared_ptr<Texture>& texture);
+        // TODO: Think about using size + position over transform (faster, less consistent api)
+		static void SubmitQuad(glm::mat4 transform, glm::vec4 color, const std::shared_ptr<Texture>& texture);
 
 		static void OnWindowResize(int width, int height);
 
 	private:
 		static void resetBatch();
-		static void submitQuad(const QuadSpec& spec);
 		static void flush();
 		static void drawIndexed(const VertexArray& vertexArray, size_t indexCount, const Shader& shader);
 		static void drawIndexed(const VertexArray& vertexArray, const Shader& shader);

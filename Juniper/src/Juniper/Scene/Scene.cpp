@@ -9,7 +9,7 @@ namespace Juniper {
 	{
 		auto& view = GetView<SpriteComponent, TransformComponent>();
 		for (auto [entity, sprite, transform] : view.each())
-			Renderer::SubmitQuad(transform.Translation, sprite.Size, sprite.Color, sprite.Texture);
+			Renderer::SubmitQuad(transform.GetTransform(), sprite.Color, sprite.Texture);
 	}
 
 	Entity Scene::CreateEntity()

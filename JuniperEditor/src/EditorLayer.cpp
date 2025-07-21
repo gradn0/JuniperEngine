@@ -49,7 +49,11 @@ namespace Juniper {
 		auto& scene = m_App.GetActiveScene();
 
 		auto quad = scene.CreateEntity();
-		scene.AddComponent<TransformComponent>(quad);
+		scene.AddComponent<TransformComponent>(quad, TransformComponent{
+			glm::vec3{10.0f, 0.0f, 0.0f},
+			glm::vec3{0.0f, 0.0f, 45.0f},
+			glm::vec3{ 10.0f }
+		});
 		scene.AddComponent<SpriteComponent>(quad, SpriteComponent{ { 16.0f, 16.0 }, glm::vec4{ 1.0f }, m_Grass });
 	}
 
@@ -64,15 +68,16 @@ namespace Juniper {
 
 		m_App.GetActiveScene().OnUpdate(dt);
 
-		/*for (size_t y = 0; y < 25; y++)
+		TransformComponent t{};
+		t.Scale = { 5.0f, 5.0f, 5.0f };
+
+		for (size_t y = 0; y < 25; y++)
 			for (size_t x = 0; x < 25; x++)
 			{
+				t.Translation = glm::vec4(x * 5.0f, y * 5.0f, 0.0f, 0.0f);
 				auto& texture = (x + y) % 2 == 0 ? m_TextureLeaf : m_TextureStone;
-				Renderer::SubmitQuad({ x * 5.0f, y * 5.0f, 0.0f }, { 5.0f, 5.0f }, glm::vec4{ 1.0f }, texture);
+				Renderer::SubmitQuad(t.GetTransform(), glm::vec4{ 1.0f }, texture);
 			}
-
-		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 400.0f, 416.0f }, glm::vec4{ 1.0f }, m_SpritesheetFloor);
-		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 80, 80 }, glm::vec4{ 1.0f }, m_Grass);*/
 
 		Renderer::EndScene();
 	}
