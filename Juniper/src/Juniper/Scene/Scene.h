@@ -13,6 +13,8 @@ namespace Juniper {
 		Scene() = default;
 		~Scene() = default;
 
+		void OnUpdate(float dt);
+
 		Entity CreateEntity();
 		void DestroyEntity(Entity entity);
 

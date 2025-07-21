@@ -45,6 +45,12 @@ namespace Juniper {
 		m_SpritesheetFloor = std::make_shared<Texture2D>("res/textures/floors.png");
 
 		m_Grass = std::make_shared<SubTexture2D>(m_SpritesheetFloor, glm::vec2(0.0f, 4.0f), glm::vec2(5.0f, 5.0f), 16.0f);
+
+		auto& scene = m_App.GetActiveScene();
+
+		auto quad = scene.CreateEntity();
+		scene.AddComponent<TransformComponent>(quad);
+		scene.AddComponent<SpriteComponent>(quad, SpriteComponent{ { 16.0f, 16.0 }, glm::vec4{ 1.0f }, m_Grass });
 	}
 
 	void EditorLayer::OnUpdate(float dt)
@@ -56,18 +62,17 @@ namespace Juniper {
 
 		Renderer::BeginScene(m_Camera, m_Shader);
 
-		for (size_t y = 0; y < 25; y++)
-		{
+		m_App.GetActiveScene().OnUpdate(dt);
+
+		/*for (size_t y = 0; y < 25; y++)
 			for (size_t x = 0; x < 25; x++)
 			{
 				auto& texture = (x + y) % 2 == 0 ? m_TextureLeaf : m_TextureStone;
-				Renderer::SubmitQuad({ x * 5.0f, y * 5.0f, 0.0f }, { 5.0f, 5.0f }, texture);
+				Renderer::SubmitQuad({ x * 5.0f, y * 5.0f, 0.0f }, { 5.0f, 5.0f }, glm::vec4{ 1.0f }, texture);
 			}
-		}
 
-		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 400.0f, 416.0f }, m_SpritesheetFloor);
-
-		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 80, 80 }, m_Grass);
+		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 400.0f, 416.0f }, glm::vec4{ 1.0f }, m_SpritesheetFloor);
+		Renderer::SubmitQuad({ 0.0f, 0.0f, 0.0f }, { 80, 80 }, glm::vec4{ 1.0f }, m_Grass);*/
 
 		Renderer::EndScene();
 	}

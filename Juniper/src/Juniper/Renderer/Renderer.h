@@ -32,7 +32,7 @@ namespace Juniper {
 		glm::vec4 Color;
 		glm::vec2 Size;
 		std::array<glm::vec2, 4> TexCoords;
-		std::shared_ptr<Texture2D> Texture;
+		std::shared_ptr<Texture> Texture;
 	};
 
 	class Renderer
@@ -47,9 +47,7 @@ namespace Juniper {
 		static void BeginScene(const OrthographicCamera& camera, const std::shared_ptr<Shader> shader);
 		static void EndScene();
 
-		static void SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color);
-		static void SubmitQuad(glm::vec3 position, glm::vec2 size, const std::shared_ptr<Texture2D>& texture);
-		static void SubmitQuad(glm::vec3 position, glm::vec2 size, const std::shared_ptr<SubTexture2D>& texture);
+		static void SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color, const std::shared_ptr<Texture>& texture);
 
 		static void OnWindowResize(int width, int height);
 

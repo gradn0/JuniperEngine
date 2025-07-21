@@ -1,5 +1,6 @@
 #pragma once
 
+#include <variant>
 #include "pch.h"
 #include "glm/glm.hpp"
 #include "Juniper/Renderer/Buffers.h"
@@ -29,6 +30,13 @@ namespace Juniper {
 			glm::mat4 s = glm::scale(glm::mat4(1.0f), Scale);
 			return t * r * s;
 		}
+	};
+
+	struct SpriteComponent
+	{
+		glm::vec2 Size{0.0f};
+		glm::vec4 Color{1.0f};
+		std::shared_ptr<Texture> Texture;
 	};
 
 }

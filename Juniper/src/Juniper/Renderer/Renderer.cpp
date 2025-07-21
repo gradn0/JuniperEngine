@@ -20,11 +20,11 @@ namespace Juniper {
 		glm::mat4 ViewProjection;
 		std::shared_ptr<VertexArray> Vao;
 		std::shared_ptr<Shader> Shader;
-		std::shared_ptr<Texture2D> DefaultTexture;
+		std::shared_ptr<Texture> DefaultTexture;
 
 		QuadVertex Vertices[MaxVertices];
 		uint32_t Indices[MaxIndices];
-		std::shared_ptr<Texture2D> Textures[MaxTextures];
+		std::shared_ptr<Texture> Textures[MaxTextures];
 		int32_t slots[MaxTextures];
 
 		uint32_t VertexPtr = 0;
@@ -88,36 +88,15 @@ namespace Juniper {
 		flush();
 	}
 
-	void Renderer::SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color)
+	void Renderer::SubmitQuad(glm::vec3 position, glm::vec2 size, glm::vec4 color, const std::shared_ptr<Texture>& texture)
 	{
+		auto& tex = texture ? texture : s_Data.DefaultTexture;
 		submitQuad({
 			position,
 			color,
 			size,
-			DefaultTexCoords,
-			s_Data.DefaultTexture
-		});
-	}
-
-	void Renderer::SubmitQuad(glm::vec3 position, glm::vec2 size, const std::shared_ptr<Texture2D>& texture)
-	{
-		submitQuad({
-			position,
-			glm::vec4{ 1.0f },
-			size,
-			DefaultTexCoords,
-			texture
-			});
-	}
-
-	void Renderer::SubmitQuad(glm::vec3 position, glm::vec2 size, const std::shared_ptr<SubTexture2D>& texture)
-	{
-		submitQuad({
-			position,
-			glm::vec4{ 1.0f },
-			size,
-			texture->GetTextureCoords(),
-			texture->GetTexture()
+			tex->GetTexCoords(),
+			tex
 		});
 	}
 
@@ -232,7 +211,7 @@ namespace Juniper {
 
 	void Renderer::flush()
 	{
-		// Bind shaders
+		// Bind textures
 		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
 			s_Data.Textures[i]->Bind(i);
 
