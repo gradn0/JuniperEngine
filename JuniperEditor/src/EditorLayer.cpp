@@ -39,7 +39,6 @@ namespace Juniper {
 	void EditorLayer::OnAttach()
 	{
 		m_Shader = std::make_shared<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
-		m_Quad = Primitives::Quad(glm::vec4(1.0f));
 		m_TextureLeaf = std::make_shared<Texture2D>("res/textures/leaf.jpg");
 		m_TextureStone = std::make_shared<Texture2D>("res/textures/stone.jpg");
 		m_SpritesheetFloor = std::make_shared<Texture2D>("res/textures/floors.png");
