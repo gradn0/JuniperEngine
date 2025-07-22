@@ -19,5 +19,3 @@
 #include "Juniper/Renderer/Shader.h"
 #include "Juniper/Renderer/Texture.h"
 #include "Juniper/Renderer/Camera.h"
-
-#include "Juniper/Utils/Primitives.h"

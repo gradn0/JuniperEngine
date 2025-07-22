@@ -34,6 +34,10 @@ namespace Juniper {
 	{
 	public:
 		VertexBuffer(const void* data, uint32_t size);
+		VertexBuffer(uint32_t size);
+
+		void SetData(const void* data, uint32_t size) const;
+
 		~VertexBuffer();
 		inline uint32_t GetId() const { return m_Id; };
 
@@ -45,7 +49,10 @@ namespace Juniper {
 	{
 	public:
 		IndexBuffer(const void* indices, uint32_t count);
+		IndexBuffer( uint32_t count);
 		~IndexBuffer();
+
+		void SetData(const void* data, uint32_t size) const;
 
 		inline uint32_t GetId() const { return m_Id; };
 		inline uint32_t GetIndexCount() const { return m_IndexCount; };
@@ -66,8 +73,11 @@ namespace Juniper {
 		inline uint32_t GetId() const { return m_Id; };
 		uint32_t GetIndexCount() const;
 
-		void AttachVertexBuffer(const VertexBuffer& vertexBuffer);
-		void AttachIndexBuffer(const IndexBuffer& indexBuffer);
+		inline std::shared_ptr<VertexBuffer> GetVertexBuffer() const { return m_VertexBuffer; }
+		inline std::shared_ptr<IndexBuffer> GetIndexBuffer() const { return m_IndexBuffer; }
+
+		void AttachVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer);
+		void AttachIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer);
 		void SetVertexLayout(const std::vector<VertexAttribute>& attributes);
 
 	private:
