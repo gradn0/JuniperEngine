@@ -38,9 +38,9 @@ namespace Juniper {
 		static void BeginScene(const OrthographicCamera& camera, const std::shared_ptr<Shader> shader);
 		static void EndScene();
 
-        // TODO: Think about using size + position over transform (faster, less consistent api)
 		static void SubmitQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Texture>& texture);
 		static void SubmitQuad(const glm::mat4& transform, const glm::vec4& color, const std::shared_ptr<Texture>& texture);
+
 		static void SubmitTilemap(const std::shared_ptr<Tilemap>& tilemap);
 
 		static void OnWindowResize(int width, int height);
@@ -48,6 +48,7 @@ namespace Juniper {
 	private:
 		static void resetBatch();
 		static void flush();
+		static void submitQuad(const std::array<glm::vec3, 4>& positions, const glm::vec4& color, const std::shared_ptr<Texture>& texture);
 		static void drawIndexed(const VertexArray& vertexArray, size_t indexCount, const Shader& shader);
 		static void drawIndexed(const VertexArray& vertexArray, const Shader& shader);
 

@@ -51,8 +51,6 @@ namespace Juniper {
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(messageCallback, 0);
 
-        //glEnable(GL_DEPTH_TEST);
-        
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -85,7 +83,6 @@ namespace Juniper {
 	{
 		s_Data.ViewProjection = camera.GetViewProjectionMatrix();
 		s_Data.Shader = shader;
-
 		resetBatch();
 
 		s_Data.Shader->Bind();
@@ -132,83 +129,57 @@ namespace Juniper {
 		}
 	}
 
-    // TODO: Clean this up (duplicated logic)
 	void Renderer::SubmitQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Texture>& texture)
 	{
-		auto& tex = texture ? texture : s_Data.DefaultTexture;
-		auto& texCoords = tex->GetTexCoords();
-
-		int existingSlot = -1;
-		float textureSlot = 0.0f;
-
-		// Check if texture has already been used this batch
-		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
-		{
-			if (s_Data.Textures[i] == tex)
+		submitQuad(
 			{
-				existingSlot = i;
-				break;
-			}
-		}
-
-		// Check whether an early flush is required
-		bool needNewTextureSlot = (existingSlot == -1);
-		bool textureLimitReached = s_Data.TexturesPtr >= std::min<uint32_t>(static_cast<uint32_t>(s_Capabilities.TextureSlots), MaxTextures);
-		bool bufferLimitReached = s_Data.VertexPtr + 4 > MaxVertices || s_Data.IndexPtr + 6 > MaxIndices;
-
-		if ((needNewTextureSlot && textureLimitReached) || bufferLimitReached)
-		{
-			flush();
-			resetBatch();
-			existingSlot = -1;
-		}
-
-		if (existingSlot == -1)
-		{
-			s_Data.Textures[s_Data.TexturesPtr] = tex;
-			textureSlot = static_cast<float>(s_Data.TexturesPtr++);
-		}
-		else
-		{
-			textureSlot = static_cast<float>(existingSlot);
-		}
-
-		QuadVertex vertex{};
-		auto baseVertex = static_cast<uint32_t>(s_Data.VertexPtr);
-
-		// Append vertices
-		vertex.Position = position;
-		vertex.Color = color;
-		vertex.TexCoords = texCoords[0];
-		vertex.TexIndex = textureSlot;
-		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
-
-		vertex.Position = { position.x + size.x, position.y, position.z };
-		vertex.Color = color;
-		vertex.TexCoords = texCoords[1];
-		vertex.TexIndex = textureSlot;
-		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
-
-		vertex.Position = { position.x + size.x, position.y + size.y, position.z };
-		vertex.Color = color;
-		vertex.TexCoords = texCoords[2];
-		vertex.TexIndex = textureSlot;
-		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
-
-		vertex.Position = { position.x, position.y + size.y, position.z };
-		vertex.Color = color;
-		vertex.TexCoords = texCoords[3];
-		vertex.TexIndex = textureSlot;
-		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
-
-		// Append indices
-		for (size_t i = 0; i < 6; i++)
-			s_Data.Indices[s_Data.IndexPtr + i] = baseVertex + indexPattern[i];
-
-		s_Data.IndexPtr += 6;
+				position,
+				{ position.x + size.x, position.y, position.z },
+				{ position.x + size.x, position.y + size.y, position.z },
+				{ position.x, position.y + size.y, position.z },
+			},
+			color,
+			texture
+		);
 	}
 
 	void Renderer::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, const std::shared_ptr<Texture>& texture)
+	{
+		std::array<glm::vec3, 4> positions = {};
+		for (size_t i = 0; i < DefaultVertexPositions.size(); ++i)
+			positions[i] = transform * DefaultVertexPositions[i];
+
+		submitQuad(
+			positions,
+			color,
+			texture
+		);
+	}
+
+	void Renderer::SetClearColor(const glm::vec4& color)
+	{
+		glClearColor(color.r, color.g, color.b, color.a);
+	}
+
+	void Renderer::Clear()
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void Renderer::SetDepthMask(bool enabled)
+	{
+		glDepthMask(enabled);
+	}
+
+	void Renderer::OnWindowResize(int width, int height)
+	{
+		glViewport(0, 0, width, height);
+	}
+}
+
+namespace Juniper {
+
+	void Renderer::submitQuad(const std::array<glm::vec3, 4>& positions, const glm::vec4& color, const std::shared_ptr<Texture>& texture)
 	{
 		auto& tex = texture ? texture : s_Data.DefaultTexture;
 		auto& texCoords = tex->GetTexCoords();
@@ -254,7 +225,7 @@ namespace Juniper {
 		// Append vertices
 		for (size_t i = 0; i < 4; i++)
 		{
-			vertex.Position = transform * DefaultVertexPositions[i];
+			vertex.Position = positions[i];
 			vertex.Color = color;
 			vertex.TexCoords = texCoords[i];
 			vertex.TexIndex = textureSlot;
@@ -267,29 +238,6 @@ namespace Juniper {
 
 		s_Data.IndexPtr += 6;
 	}
-
-	void Renderer::SetClearColor(const glm::vec4& color)
-	{
-		glClearColor(color.r, color.g, color.b, color.a);
-	}
-
-	void Renderer::Clear()
-	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-
-	void Renderer::SetDepthMask(bool enabled)
-	{
-		glDepthMask(enabled);
-	}
-
-	void Renderer::OnWindowResize(int width, int height)
-	{
-		glViewport(0, 0, width, height);
-	}
-}
-
-namespace Juniper {
 
 	void Renderer::resetBatch()
 	{
