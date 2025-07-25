@@ -27,10 +27,7 @@ namespace Juniper {
 		float m_HasCameraUpdated = false;
 
 		std::shared_ptr<Shader> m_Shader;
-		std::shared_ptr<Texture2D> m_TextureLeaf;
-		std::shared_ptr<Texture2D> m_TextureStone;
-		std::shared_ptr<Texture2D> m_SpritesheetFloor;
-		std::shared_ptr<SubTexture2D> m_Grass;
+		std::shared_ptr<Tilemap> m_Tilemap;
 
 		void updateCamera(float dt); 
 	};

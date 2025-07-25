@@ -36,10 +36,10 @@ namespace Juniper {
 
 // Asserts
 #ifdef JP_ASSERTS
-	#define JP_CORE_ASSERT(x, ...) { if (!(x)) { JP_CORE_CRITICAL("Assertion failed: {0}", __VA_ARGS__); __debugbreak(); } }
-	#define JP_CLIENT_ASSERT(x, ...) { if (!(x)) { JP_CLIENT_CRITICAL("Assertion failed: {0}", __VA_ARGS__); __debugbreak(); } }
-	#define JP_CORE_VERIFY(x, ...) { if (!(x)) { JP_CORE_CRITICAL("Verification failed: {0}", __VA_ARGS__); __debugbreak(); } }
-	#define JP_CLIENT_VERIFY(x, ...) { if (!(x)) { JP_CLIENT_CRITICAL("Verification failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#define JP_CORE_ASSERT(x, ...) { if (!(x)) { JP_CLIENT_ERROR("Assertion failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#define JP_CLIENT_ASSERT(x, ...) { if (!(x)) { JP_CLIENT_ERROR("Assertion failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#define JP_CORE_VERIFY(x, ...) { if (!(x)) { JP_CLIENT_ERROR("Verification failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#define JP_CLIENT_VERIFY(x, ...) { if (!(x)) { JP_CLIENT_ERROR("Verification failed: {0}", __VA_ARGS__); __debugbreak(); } }
 #else
 	#define JP_CORE_ASSERT(x, ...)
 	#define JP_CLIENT_ASSERT(x, ...)

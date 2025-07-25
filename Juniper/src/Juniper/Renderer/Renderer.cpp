@@ -2,6 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "Juniper/Core/Log.h"
 #include "Renderer.h"
+#include "tinyxml2.h"
 
 namespace Juniper {
 	constexpr uint32_t MaxQuads = 1000;
@@ -50,7 +51,10 @@ namespace Juniper {
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(messageCallback, 0);
 
-		glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_DEPTH_TEST);
+        
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Query capabilities
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &s_Capabilities.TextureSlots);
@@ -95,7 +99,116 @@ namespace Juniper {
 		flush();
 	}
 
-	void Renderer::SubmitQuad(glm::mat4 transform, glm::vec4 color, const std::shared_ptr<Texture>& texture)
+	void Renderer::SubmitTilemap(const std::shared_ptr<Tilemap>& tilemap)
+	{
+		int mapHeight = tilemap->GetHeight();
+		auto& layers = tilemap->GetLayers();
+
+		std::shared_ptr<Texture> currentTexture = nullptr;
+
+		for (int i = 0; i < layers.size(); ++i)
+		{
+			auto& layer = layers[i];
+			for (int j = 0; j < layer.TextureIndices.size(); ++j)
+			{
+				auto& index = layer.TextureIndices[j];
+				if (index == -1) continue;
+
+				auto& texture = layer.Textures[index];
+
+				// TODO: Fix the root issue (texture switching causes artifacts)
+				if (currentTexture && texture->GetTexture()->GetId() != currentTexture->GetTexture()->GetId()) {
+					flush();
+					resetBatch();
+				}
+				currentTexture = texture;
+
+				// Ensure exact integer positioning
+				float x = static_cast<float>(j % tilemap->GetWidth());
+				float y = static_cast<float>(mapHeight - (j / tilemap->GetWidth()) - 1);
+
+				SubmitQuad(glm::vec3{ x, y, 0.0f }, glm::vec2{ 1.0f, 1.0f }, glm::vec4(1.0f), texture);
+			}
+		}
+	}
+
+    // TODO: Clean this up (duplicated logic)
+	void Renderer::SubmitQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Texture>& texture)
+	{
+		auto& tex = texture ? texture : s_Data.DefaultTexture;
+		auto& texCoords = tex->GetTexCoords();
+
+		int existingSlot = -1;
+		float textureSlot = 0.0f;
+
+		// Check if texture has already been used this batch
+		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
+		{
+			if (s_Data.Textures[i] == tex)
+			{
+				existingSlot = i;
+				break;
+			}
+		}
+
+		// Check whether an early flush is required
+		bool needNewTextureSlot = (existingSlot == -1);
+		bool textureLimitReached = s_Data.TexturesPtr >= std::min<uint32_t>(static_cast<uint32_t>(s_Capabilities.TextureSlots), MaxTextures);
+		bool bufferLimitReached = s_Data.VertexPtr + 4 > MaxVertices || s_Data.IndexPtr + 6 > MaxIndices;
+
+		if ((needNewTextureSlot && textureLimitReached) || bufferLimitReached)
+		{
+			flush();
+			resetBatch();
+			existingSlot = -1;
+		}
+
+		if (existingSlot == -1)
+		{
+			s_Data.Textures[s_Data.TexturesPtr] = tex;
+			textureSlot = static_cast<float>(s_Data.TexturesPtr++);
+		}
+		else
+		{
+			textureSlot = static_cast<float>(existingSlot);
+		}
+
+		QuadVertex vertex{};
+		auto baseVertex = static_cast<uint32_t>(s_Data.VertexPtr);
+
+		// Append vertices
+		vertex.Position = position;
+		vertex.Color = color;
+		vertex.TexCoords = texCoords[0];
+		vertex.TexIndex = textureSlot;
+		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
+
+		vertex.Position = { position.x + size.x, position.y, position.z };
+		vertex.Color = color;
+		vertex.TexCoords = texCoords[1];
+		vertex.TexIndex = textureSlot;
+		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
+
+		vertex.Position = { position.x + size.x, position.y + size.y, position.z };
+		vertex.Color = color;
+		vertex.TexCoords = texCoords[2];
+		vertex.TexIndex = textureSlot;
+		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
+
+		vertex.Position = { position.x, position.y + size.y, position.z };
+		vertex.Color = color;
+		vertex.TexCoords = texCoords[3];
+		vertex.TexIndex = textureSlot;
+		s_Data.Vertices[s_Data.VertexPtr++] = vertex;
+
+		// Append indices
+		for (size_t i = 0; i < 6; i++)
+			s_Data.Indices[s_Data.IndexPtr + i] = baseVertex + indexPattern[i];
+
+		s_Data.IndexPtr += 6;
+	}
+
+	void Renderer::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, const std::shared_ptr<Texture>& texture)
 	{
 		auto& tex = texture ? texture : s_Data.DefaultTexture;
 		auto& texCoords = tex->GetTexCoords();
@@ -155,9 +268,9 @@ namespace Juniper {
 		s_Data.IndexPtr += 6;
 	}
 
-	void Renderer::SetClearColor(float r, float g, float b, float a)
+	void Renderer::SetClearColor(const glm::vec4& color)
 	{
-		glClearColor(r, g, b, a);
+		glClearColor(color.r, color.g, color.b, color.a);
 	}
 
 	void Renderer::Clear()
@@ -176,7 +289,6 @@ namespace Juniper {
 	}
 }
 
-// Internal
 namespace Juniper {
 
 	void Renderer::resetBatch()

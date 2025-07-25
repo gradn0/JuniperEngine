@@ -13,6 +13,7 @@
 
 #include "Juniper/Scene/Scene.h"
 #include "Juniper/Scene/Components.h"
+#include "Juniper/Scene/Tilemap.h"
 
 #include "Juniper/Renderer/Renderer.h"
 #include "Juniper/Renderer/Buffers.h"

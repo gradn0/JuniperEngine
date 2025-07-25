@@ -111,7 +111,7 @@ namespace Juniper {
 		stbi_set_flip_vertically_on_load(flip);
 		stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 		if (!data)
-			JP_CORE_ERROR("Failed to load image: {0}", path);
+			JP_CORE_ERROR("Failed to load image {0}: {1}", path, stbi_failure_reason());
 		return data;
 	}
 }

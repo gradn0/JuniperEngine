@@ -9,6 +9,7 @@
 #include "Juniper/Renderer/Camera.h"
 #include "Buffers.h"
 #include "Shader.h"
+#include "Juniper/Scene/Tilemap.h"
 
 namespace Juniper {
 
@@ -30,7 +31,7 @@ namespace Juniper {
 	public:
 		static void Init();
 
-		static void SetClearColor(float r, float g, float b, float a);
+		static void SetClearColor(const glm::vec4& color);
 		static void Clear();
 		static void SetDepthMask(bool enabled);
 
@@ -38,7 +39,9 @@ namespace Juniper {
 		static void EndScene();
 
         // TODO: Think about using size + position over transform (faster, less consistent api)
-		static void SubmitQuad(glm::mat4 transform, glm::vec4 color, const std::shared_ptr<Texture>& texture);
+		static void SubmitQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Texture>& texture);
+		static void SubmitQuad(const glm::mat4& transform, const glm::vec4& color, const std::shared_ptr<Texture>& texture);
+		static void SubmitTilemap(const std::shared_ptr<Tilemap>& tilemap);
 
 		static void OnWindowResize(int width, int height);
 

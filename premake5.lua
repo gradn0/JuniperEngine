@@ -29,7 +29,8 @@ project "Juniper"
         "%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
         "%{prj.name}/vendor/glad/src/glad.c",
-        "%{prj.name}/vendor/stb_image/**.h", "%{prj.name}/vendor/stb_image/**.cpp"
+        "%{prj.name}/vendor/stb_image/**.h", "%{prj.name}/vendor/stb_image/**.cpp",
+        "%{prj.name}/vendor/tinyxml2/**.h", "%{prj.name}/vendor/tinyxml2/**.cpp"
     }
 
     includedirs {
@@ -41,6 +42,7 @@ project "Juniper"
         "%{prj.name}/vendor/glm",
         "%{prj.name}/vendor/stb_image",
         "%{prj.name}/vendor/entt",
+        "%{prj.name}/vendor/tinyxml2"
     }
 
     links { "GLFW", "glad", "opengl32.lib", "ImGui" }
