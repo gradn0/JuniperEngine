@@ -13,9 +13,11 @@
 
 namespace Juniper {
 
-	struct Capabilities
+	struct Stats
 	{
-		int TextureSlots = 32;
+		uint32_t DrawCalls = 0;
+		uint32_t QuadCount = 0;
+		uint32_t TextureSlotsUsed = 0;
 	};
 
 	struct QuadVertex
@@ -24,6 +26,11 @@ namespace Juniper {
 		glm::vec4 Color;
 		glm::vec2 TexCoords;
 		float TexIndex;
+	};
+
+	struct Capabilities
+	{
+		int TextureSlots = 32;
 	};
 
 	class Renderer
@@ -45,10 +52,13 @@ namespace Juniper {
 
 		static void OnWindowResize(int width, int height);
 
+		static Stats GetStats();
+		static void ResetStats();
+
 	private:
 		static void resetBatch();
 		static void flush();
-		static void submitQuad(const std::array<glm::vec3, 4>& positions, const glm::vec4& color, const std::shared_ptr<Texture>& texture);
+		static void submitQuad(const std::array<glm::vec3, 4>& positions, const glm::vec4& color, const std::shared_ptr<Texture>& texture, const std::array<glm::vec2, 4>& texCoords);
 		static void drawIndexed(const VertexArray& vertexArray, size_t indexCount, const Shader& shader);
 		static void drawIndexed(const VertexArray& vertexArray, const Shader& shader);
 
@@ -64,4 +74,3 @@ namespace Juniper {
 	};
 
 }
-

@@ -5,14 +5,19 @@
 
 namespace Juniper {
 
-	struct TilemapLayer
-	{
-		std::vector<std::shared_ptr<SubTexture2D>> Textures; // TODO: Probably don't want a vector of ptrs here
-		std::vector<int> TextureIndices;
-	};
-
 	class Tilemap
 	{
+		struct Tile {
+			std::shared_ptr<Texture2D> Texture;
+			std::array<glm::vec2, 4> TexCoords;
+		};
+
+		struct TilemapLayer
+		{
+			std::vector<Tile> TileRegistry;
+			std::vector<int32_t> TileIndices;
+		};
+
 	public:
 		Tilemap(const std::string& filepath);
 		~Tilemap() = default;
@@ -26,6 +31,7 @@ namespace Juniper {
 		int m_Height = 0;
 		int m_Width = 0;
 		int m_TileSize = 0;
+
 		std::vector<TilemapLayer> m_Layers;
 	};
 

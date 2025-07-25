@@ -26,6 +26,8 @@ namespace Juniper {
 			}};
 		}
 
+		static std::array<glm::vec2, 4> GenerateTexCoords(glm::vec2 parentSize, glm::vec2 childSize, float tileSize, glm::vec2 offset);
+
 		bool operator==(const Texture& other) const { return GetId() == other.GetId(); }
 	};
 

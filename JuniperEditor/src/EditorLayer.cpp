@@ -52,6 +52,12 @@ namespace Juniper {
 		Renderer::BeginScene(m_Camera, m_Shader);
 		Renderer::SubmitTilemap(m_Tilemap);
 		Renderer::EndScene();
+
+		Stats stats = Renderer::GetStats();
+		std::cout << "Draw calls: " << stats.DrawCalls << std::endl;
+		std::cout << "Quad count: " << stats.QuadCount << std::endl;
+		std::cout << "Texture slots used: " << stats.TextureSlotsUsed << std::endl;
+		Renderer::ResetStats();
 	}
 
 	void EditorLayer::OnImGuiRender()

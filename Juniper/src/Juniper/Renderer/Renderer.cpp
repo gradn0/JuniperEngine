@@ -5,7 +5,8 @@
 #include "tinyxml2.h"
 
 namespace Juniper {
-	constexpr uint32_t MaxQuads = 1000;
+
+	constexpr uint32_t MaxQuads = 5000;
 	constexpr uint32_t MaxVertices = MaxQuads * 4;
 	constexpr uint32_t MaxIndices = MaxQuads * 6;
 	constexpr uint32_t MaxTextures = 32;
@@ -38,6 +39,8 @@ namespace Juniper {
 		uint32_t VertexPtr = 0;
 		uint32_t IndexPtr = 0;
 		uint32_t TexturesPtr = 0;
+
+		Stats Stats;
 	};
 
 	static Data s_Data;
@@ -106,25 +109,38 @@ namespace Juniper {
 		for (int i = 0; i < layers.size(); ++i)
 		{
 			auto& layer = layers[i];
-			for (int j = 0; j < layer.TextureIndices.size(); ++j)
+			for (int j = 0; j < layer.TileIndices.size(); ++j)
 			{
-				auto& index = layer.TextureIndices[j];
+				auto& index = layer.TileIndices[j];
 				if (index == -1) continue;
 
-				auto& texture = layer.Textures[index];
+				auto& tile = layer.TileRegistry[index];
 
-				// TODO: Fix the root issue (texture switching causes artifacts)
-				if (currentTexture && texture->GetTexture()->GetId() != currentTexture->GetTexture()->GetId()) {
+                // TODO: Fix the root issue (texture switching causes artifacts)
+				if (currentTexture && tile.Texture->GetTexture()->GetId() != currentTexture->GetTexture()->GetId()) {
 					flush();
 					resetBatch();
 				}
-				currentTexture = texture;
+				currentTexture = tile.Texture;
 
-				// Ensure exact integer positioning
 				float x = static_cast<float>(j % tilemap->GetWidth());
 				float y = static_cast<float>(mapHeight - (j / tilemap->GetWidth()) - 1);
 
-				SubmitQuad(glm::vec3{ x, y, 0.0f }, glm::vec2{ 1.0f, 1.0f }, glm::vec4(1.0f), texture);
+				auto& position = glm::vec3{ x, y, 0.0f };
+				auto& size = glm::vec2{ 1.0f, 1.0f };
+                std::array<glm::vec3, 4> positions = {
+                    position,
+                    { position.x + size.x, position.y, position.z },
+                    { position.x + size.x, position.y + size.y, position.z },
+                    { position.x, position.y + size.y, position.z },
+                };
+
+				submitQuad(
+					positions,
+					glm::vec4(1.0f),
+					tile.Texture,
+					tile.TexCoords
+				);
 			}
 		}
 	}
@@ -139,7 +155,8 @@ namespace Juniper {
 				{ position.x, position.y + size.y, position.z },
 			},
 			color,
-			texture
+			texture,
+			texture->GetTexCoords()
 		);
 	}
 
@@ -152,7 +169,8 @@ namespace Juniper {
 		submitQuad(
 			positions,
 			color,
-			texture
+			texture,
+			texture->GetTexCoords()
 		);
 	}
 
@@ -175,14 +193,25 @@ namespace Juniper {
 	{
 		glViewport(0, 0, width, height);
 	}
+
+	Stats Renderer::GetStats()
+	{
+		return s_Data.Stats;
+	}
+
+	void Renderer::ResetStats()
+	{
+		s_Data.Stats = Stats{};
+	}
 }
 
 namespace Juniper {
 
-	void Renderer::submitQuad(const std::array<glm::vec3, 4>& positions, const glm::vec4& color, const std::shared_ptr<Texture>& texture)
+	void Renderer::submitQuad(const std::array<glm::vec3, 4>& positions, const glm::vec4& color, const std::shared_ptr<Texture>& texture, const std::array<glm::vec2, 4>& texCoords)
 	{
+		s_Data.Stats.QuadCount++;
+
 		auto& tex = texture ? texture : s_Data.DefaultTexture;
-		auto& texCoords = tex->GetTexCoords();
 
 		int existingSlot = -1;
 		float textureSlot = 0.0f;
@@ -211,6 +240,7 @@ namespace Juniper {
 
 		if (existingSlot == -1)
 		{
+			s_Data.Stats.TextureSlotsUsed++;
 			s_Data.Textures[s_Data.TexturesPtr] = tex;
 			textureSlot = static_cast<float>(s_Data.TexturesPtr++);
 		}
@@ -248,6 +278,8 @@ namespace Juniper {
 
 	void Renderer::flush()
 	{
+		s_Data.Stats.DrawCalls++;
+
 		// Bind textures
 		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
 			s_Data.Textures[i]->Bind(i);

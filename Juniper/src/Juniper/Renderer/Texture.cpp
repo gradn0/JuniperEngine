@@ -13,6 +13,27 @@ namespace Juniper {
 
 namespace Juniper {
 
+	// TODO: Make this api nicer
+	std::array<glm::vec2, 4> Texture::GenerateTexCoords(glm::vec2 parentSizePix, glm::vec2 childSizePrim, float primitiveSizePix, glm::vec2 offsetPrim)
+	{
+		glm::vec2 min{
+			(offsetPrim.x * primitiveSizePix) / static_cast<float>(parentSizePix.x),
+			(offsetPrim.y * primitiveSizePix) / static_cast<float>(parentSizePix.y)
+		};
+
+		glm::vec2 max{
+			((offsetPrim.x + childSizePrim.x) * primitiveSizePix) / static_cast<float>(parentSizePix.x),
+			((offsetPrim.y + childSizePrim.y) * primitiveSizePix) / static_cast<float>(parentSizePix.y)
+		};
+
+		return {
+			glm::vec2{ min.x, min.y },
+			glm::vec2{ max.x, min.y },
+			glm::vec2{ max.x, max.y },
+			glm::vec2{ min.x, max.y }
+		};
+	}
+
 	Texture2D::Texture2D(const std::string& filepath, bool flip)
 	{
 		stbi_uc* data = LoadTexture(filepath, m_Width, m_Height, m_Channels, flip);
@@ -66,23 +87,7 @@ namespace Juniper {
 	SubTexture2D::SubTexture2D(const std::shared_ptr<Texture2D>& parent, glm::vec2 offset, glm::vec2 size, float spriteSize)
 		: m_Parent(parent)
 	{
-		// Calcuate texure coordinates
-		glm::vec2 min{
-			(offset.x * spriteSize) / static_cast<float>(m_Parent->GetWidth()),
-			(offset.y * spriteSize) / static_cast<float>(m_Parent->GetHeight())
-		};
-
-		glm::vec2 max{
-			((offset.x + size.x) * spriteSize) / static_cast<float>(m_Parent->GetWidth()),
-			((offset.y + size.y) * spriteSize) / static_cast<float>(m_Parent->GetHeight())
-		};
-
-		m_TexCoords = {
-			glm::vec2{ min.x, min.y },
-			glm::vec2{ max.x, min.y },
-			glm::vec2{ max.x, max.y },
-			glm::vec2{ min.x, max.y }
-		};
+		m_TexCoords = GenerateTexCoords({ parent->GetWidth(), parent->GetHeight() }, size, spriteSize, offset);
 	}
     
 	void SubTexture2D::Bind(uint32_t slot) const
