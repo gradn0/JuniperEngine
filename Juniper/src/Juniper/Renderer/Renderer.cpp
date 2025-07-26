@@ -99,7 +99,7 @@ namespace Juniper {
 		flush();
 	}
 
-	void Renderer::SubmitTilemap(const std::shared_ptr<Tilemap>& tilemap)
+	void Renderer::SubmitTilemap(const std::shared_ptr<Tilemap>& tilemap, const glm::vec3& translation)
 	{
 		int mapHeight = tilemap->GetHeight();
 		auto& layers = tilemap->GetLayers();
@@ -117,7 +117,7 @@ namespace Juniper {
 				auto& tile = layer.TileRegistry[index];
 
                 // TODO: Fix the root issue (texture switching causes artifacts)
-				if (currentTexture && tile.Texture->GetTexture()->GetId() != currentTexture->GetTexture()->GetId()) {
+				if (currentTexture && tile.Texture->GetTexture() != currentTexture->GetTexture()) {
 					flush();
 					resetBatch();
 				}
@@ -126,7 +126,7 @@ namespace Juniper {
 				float x = static_cast<float>(j % tilemap->GetWidth());
 				float y = static_cast<float>(mapHeight - (j / tilemap->GetWidth()) - 1);
 
-				auto& position = glm::vec3{ x, y, 0.0f };
+				auto& position = glm::vec3{ x, y, 0.0f } + translation;
 				auto& size = glm::vec2{ 1.0f, 1.0f };
                 std::array<glm::vec3, 4> positions = {
                     position,
@@ -147,6 +147,7 @@ namespace Juniper {
 
 	void Renderer::SubmitQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Texture>& texture)
 	{
+		auto& tex = texture ? texture : s_Data.DefaultTexture;
 		submitQuad(
 			{
 				position,
@@ -155,13 +156,14 @@ namespace Juniper {
 				{ position.x, position.y + size.y, position.z },
 			},
 			color,
-			texture,
-			texture->GetTexCoords()
+			tex,
+			tex->GetTexCoords()
 		);
 	}
 
 	void Renderer::SubmitQuad(const glm::mat4& transform, const glm::vec4& color, const std::shared_ptr<Texture>& texture)
 	{
+		auto& tex = texture ? texture : s_Data.DefaultTexture;
 		std::array<glm::vec3, 4> positions = {};
 		for (size_t i = 0; i < DefaultVertexPositions.size(); ++i)
 			positions[i] = transform * DefaultVertexPositions[i];
@@ -169,8 +171,8 @@ namespace Juniper {
 		submitQuad(
 			positions,
 			color,
-			texture,
-			texture->GetTexCoords()
+			tex,
+			tex->GetTexCoords()
 		);
 	}
 
@@ -211,15 +213,13 @@ namespace Juniper {
 	{
 		s_Data.Stats.QuadCount++;
 
-		auto& tex = texture ? texture : s_Data.DefaultTexture;
-
 		int existingSlot = -1;
 		float textureSlot = 0.0f;
 
 		// Check if texture has already been used this batch
 		for (uint32_t i = 0; i < s_Data.TexturesPtr; i++)
 		{
-			if (s_Data.Textures[i] == tex)
+			if (s_Data.Textures[i] == texture)
 			{
 				existingSlot = i;
 				break;
@@ -241,7 +241,7 @@ namespace Juniper {
 		if (existingSlot == -1)
 		{
 			s_Data.Stats.TextureSlotsUsed++;
-			s_Data.Textures[s_Data.TexturesPtr] = tex;
+			s_Data.Textures[s_Data.TexturesPtr] = texture;
 			textureSlot = static_cast<float>(s_Data.TexturesPtr++);
 		}
 		else

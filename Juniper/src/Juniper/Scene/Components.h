@@ -6,6 +6,7 @@
 #include "Juniper/Renderer/Buffers.h"
 #include "Juniper/Renderer/Texture.h"
 #include "Juniper/Renderer/Shader.h"
+#include "Juniper/Scene/Tilemap.h"
 
 namespace Juniper {
 
@@ -37,6 +38,11 @@ namespace Juniper {
 		glm::vec2 Size{0.0f};
 		glm::vec4 Color{1.0f};
 		std::shared_ptr<Texture> Texture;
+	};
+
+	struct TilemapComponent
+	{
+		std::shared_ptr<Tilemap> Tilemap;
 	};
 
 }

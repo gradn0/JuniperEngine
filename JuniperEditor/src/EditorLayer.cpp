@@ -2,6 +2,7 @@
 #include "glm/glm.hpp"
 #include "EditorLayer.h"
 #include "Panels.h"
+#include "Juniper/Scene/Tilemap.h"
 
 namespace Juniper {
 
@@ -39,7 +40,13 @@ namespace Juniper {
 	void EditorLayer::OnAttach()
 	{
 		m_Shader = std::make_shared<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
-		m_Tilemap = std::make_shared<Tilemap>("res/tiling/testmap.tmx");
+
+		auto& scene = m_App.GetActiveScene();
+		auto tilemap = scene.CreateEntity();
+
+		scene.AddComponent<TagComponent>(tilemap, "Tilemap");
+		scene.AddComponent<TransformComponent>(tilemap);
+		scene.AddComponent<TilemapComponent>(tilemap, std::make_shared<Tilemap>("res/tiling/testmap.tmx"));
 	}
 
 	void EditorLayer::OnUpdate(float dt)
@@ -50,19 +57,14 @@ namespace Juniper {
 		Renderer::Clear();
 
 		Renderer::BeginScene(m_Camera, m_Shader);
-		Renderer::SubmitTilemap(m_Tilemap);
+		m_App.GetActiveScene().OnUpdate(dt);
 		Renderer::EndScene();
-
-		Stats stats = Renderer::GetStats();
-		std::cout << "Draw calls: " << stats.DrawCalls << std::endl;
-		std::cout << "Quad count: " << stats.QuadCount << std::endl;
-		std::cout << "Texture slots used: " << stats.TextureSlotsUsed << std::endl;
-		Renderer::ResetStats();
 	}
 
 	void EditorLayer::OnImGuiRender()
 	{
 		Panels::ScenePanel(m_App.GetActiveScene());
+		Panels::StatsPanel();
 	}
 
 	void EditorLayer::updateCamera(float dt)

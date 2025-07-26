@@ -5,5 +5,6 @@
 namespace Juniper { namespace Panels {
 
 	void ScenePanel(Scene& scene);
-	
+	void StatsPanel();
+
 }}

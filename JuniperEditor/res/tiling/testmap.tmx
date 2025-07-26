@@ -2,7 +2,7 @@
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="1">
  <tileset firstgid="1" source="floors.tsx"/>
  <tileset firstgid="651" source="Vegetation.tsx"/>
- <layer id="1" name="Tile Layer 1" width="30" height="20">
+ <layer id="1" name="Tile Layer 1" width="30" height="20" visible="0">
   <data encoding="csv">
 254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,258,258,282,258,254,254,254,254,
 254,254,277,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,258,258,283,283,254,254,254,254,
@@ -26,7 +26,7 @@
 254,254,254,277,254,254,254,254,254,258,282,258,258,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254,254
 </data>
  </layer>
- <layer id="4" name="Tile Layer 2" width="30" height="20">
+ <layer id="4" name="Tile Layer 2" width="30" height="20" visible="0">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
