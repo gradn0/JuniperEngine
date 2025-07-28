@@ -71,7 +71,6 @@ namespace Juniper {
 			tilesets.FirstGids.push_back(firstGid);
 
 			// Load textures and store in tilesets
-			int textureCount = tilesets.Textures.size();
 			tilesets.Textures.emplace_back(std::make_shared<Texture2D>(imagePath.string()));
 
 			tilesets.Count++;
@@ -97,11 +96,11 @@ namespace Juniper {
 			while (stream.good())
 			{
 				std::getline(stream, gidStr, ',');
-				int gid = std::stoi(gidStr);
+				uint32_t gid = static_cast<uint32_t>(std::stoi(gidStr));
 				int tileIndex;
 
-				// Handle blank tiles
-				if (gid == 0)
+				// Handle blank/invalid tiles
+				if (gid <= 0)
 				{
 					tilemapLayer.TileIndices.push_back(-1);
 					continue;
@@ -116,11 +115,11 @@ namespace Juniper {
 				else
 				{
 					// Tile needes to be added to registry
-					size_t tilesetIndex = 0;
-					size_t baseGid = 1;
+					uint32_t tilesetIndex = 0;
+					uint32_t baseGid = 1;
 
 					// Determine which tileset to use based on gid
-					for (size_t i = 0; i < tilesets.Count; ++i)
+					for (uint32_t i = 0; i < tilesets.Count; ++i)
 					{
 						uint32_t gidBegin = tilesets.FirstGids[i];
 						uint32_t gidEnd = (i + 1 < tilesets.Count) ? tilesets.FirstGids[i + 1] : UINT32_MAX;
@@ -143,16 +142,16 @@ namespace Juniper {
 						static_cast<float>(rows * m_TileSize)
 					};
 
-					glm::vec2 offset = {
+					glm::vec2 offsetTiles = {
 						static_cast<float>(tilesetOffset % cols),
 						static_cast<float>(rows - (tilesetOffset / cols) - 1)
 					};
 
-					glm::vec2& childSize = glm::vec2{ 1.0f };
+					glm::vec2& sizeTiles = glm::vec2{ 1.0f };
 
 					tilemapLayer.TileRegistry.emplace_back(Tile{
 						tilesets.Textures[tilesetIndex],
-						Texture::GenerateTexCoords(parentSize, childSize, static_cast<float>(m_TileSize), offset)
+						Texture::GenerateTexCoords(parentSize, offsetTiles, sizeTiles, static_cast<float>(m_TileSize))
 					});
 
 					tileIndex = static_cast<uint32_t>(tilemapLayer.TileRegistry.size() - 1);

@@ -26,7 +26,7 @@ namespace Juniper {
 			}};
 		}
 
-		static std::array<glm::vec2, 4> GenerateTexCoords(glm::vec2 parentSize, glm::vec2 childSize, float tileSize, glm::vec2 offset);
+		static std::array<glm::vec2, 4> GenerateTexCoords(glm::vec2 parentSize, glm::vec2 offsetTiles, glm::vec2 sizeTiles, float tileSize);
 
 		bool operator==(const Texture& other) const { return GetId() == other.GetId(); }
 	};
@@ -55,7 +55,7 @@ namespace Juniper {
 	class SubTexture2D : public Texture
 	{
 	public:
-		SubTexture2D(const std::shared_ptr<Texture2D>& parent, glm::vec2 offset, glm::vec2 size, float spriteSize);
+		SubTexture2D(const std::shared_ptr<Texture2D>& parent, glm::vec2 offsetTiles, glm::vec2 sizeTiles, float tileSize);
 		~SubTexture2D() = default;
 
 		void Bind(uint32_t slot = 0) const override;

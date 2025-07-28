@@ -12,7 +12,11 @@ namespace Juniper {
 		uint32_t vs = CompileShader(GL_VERTEX_SHADER, ReadShaderFile(vsPath).c_str());
 		uint32_t fs = CompileShader(GL_FRAGMENT_SHADER, ReadShaderFile(fsPath).c_str());
 
-		if (!vs || !fs) return;
+		if (!vs || !fs)
+        {
+            JP_CORE_ERROR("Shader construction requires at least a vertex and fragment shader");
+            return;
+        }
 
 		m_Id = glCreateProgram();
 		glAttachShader(m_Id, vs);

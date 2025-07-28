@@ -1,8 +1,8 @@
 #include "pch.h"
 #include <glad/glad.h>
 #include "stb_image.h"
-#include "Juniper/Core/Log.h"
 #include "Texture.h"
+#include "Juniper/Core/Log.h"
 
 namespace Juniper {
 
@@ -13,17 +13,16 @@ namespace Juniper {
 
 namespace Juniper {
 
-	// TODO: Make this api nicer
-	std::array<glm::vec2, 4> Texture::GenerateTexCoords(glm::vec2 parentSizePix, glm::vec2 childSizePrim, float primitiveSizePix, glm::vec2 offsetPrim)
+	std::array<glm::vec2, 4> Texture::GenerateTexCoords(glm::vec2 parentSize, glm::vec2 offsetTiles, glm::vec2 sizeTiles, float tileSize)
 	{
 		glm::vec2 min{
-			(offsetPrim.x * primitiveSizePix) / static_cast<float>(parentSizePix.x),
-			(offsetPrim.y * primitiveSizePix) / static_cast<float>(parentSizePix.y)
+			(offsetTiles.x * tileSize) / static_cast<float>(parentSize.x),
+			(offsetTiles.y * tileSize) / static_cast<float>(parentSize.y)
 		};
 
 		glm::vec2 max{
-			((offsetPrim.x + childSizePrim.x) * primitiveSizePix) / static_cast<float>(parentSizePix.x),
-			((offsetPrim.y + childSizePrim.y) * primitiveSizePix) / static_cast<float>(parentSizePix.y)
+			((offsetTiles.x + sizeTiles.x) * tileSize) / static_cast<float>(parentSize.x),
+			((offsetTiles.y + sizeTiles.y) * tileSize) / static_cast<float>(parentSize.y)
 		};
 
 		return {
@@ -84,10 +83,10 @@ namespace Juniper {
 		glBindTextureUnit(slot, m_Id);
 	}
 
-	SubTexture2D::SubTexture2D(const std::shared_ptr<Texture2D>& parent, glm::vec2 offset, glm::vec2 size, float spriteSize)
+	SubTexture2D::SubTexture2D(const std::shared_ptr<Texture2D>& parent, glm::vec2 offsetTiles, glm::vec2 sizeTiles, float tileSize)
 		: m_Parent(parent)
 	{
-		m_TexCoords = GenerateTexCoords({ parent->GetWidth(), parent->GetHeight() }, size, spriteSize, offset);
+		m_TexCoords = GenerateTexCoords({ parent->GetWidth(), parent->GetHeight() }, offsetTiles, sizeTiles, tileSize);
 	}
     
 	void SubTexture2D::Bind(uint32_t slot) const

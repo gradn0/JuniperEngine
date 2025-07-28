@@ -1,7 +1,7 @@
 #include "pch.h"
+#include "glm/gtc/matrix_transform.hpp"
 #include "Camera.h"
 #include "Juniper/Core/Log.h"
-#include "glm/gtc/matrix_transform.hpp"
 
 Juniper::OrthographicCamera::OrthographicCamera(float aspectRatio, float zoom) :
 	m_AspectRatio(aspectRatio),

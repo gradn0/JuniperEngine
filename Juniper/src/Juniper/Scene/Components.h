@@ -1,11 +1,9 @@
 #pragma once
 
-#include <variant>
 #include "pch.h"
 #include "glm/glm.hpp"
-#include "Juniper/Renderer/Buffers.h"
+#include "glm/gtc/matrix_transform.hpp"
 #include "Juniper/Renderer/Texture.h"
-#include "Juniper/Renderer/Shader.h"
 #include "Juniper/Scene/Tilemap.h"
 
 namespace Juniper {
@@ -35,7 +33,6 @@ namespace Juniper {
 
 	struct SpriteComponent
 	{
-		glm::vec2 Size{0.0f};
 		glm::vec4 Color{1.0f};
 		std::shared_ptr<Texture> Texture;
 	};

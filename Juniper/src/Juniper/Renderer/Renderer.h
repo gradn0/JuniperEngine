@@ -4,12 +4,11 @@
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "Juniper/Core/Core.h"
-#include "Juniper/Scene/Scene.h"
+#include "Juniper/Scene/Tilemap.h"
 #include "Juniper/Renderer/Texture.h"
 #include "Juniper/Renderer/Camera.h"
 #include "Buffers.h"
 #include "Shader.h"
-#include "Juniper/Scene/Tilemap.h"
 
 namespace Juniper {
 

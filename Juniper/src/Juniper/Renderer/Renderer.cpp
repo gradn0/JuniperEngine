@@ -2,7 +2,6 @@
 #include "GLFW/glfw3.h"
 #include "Juniper/Core/Log.h"
 #include "Renderer.h"
-#include "tinyxml2.h"
 
 namespace Juniper {
 
