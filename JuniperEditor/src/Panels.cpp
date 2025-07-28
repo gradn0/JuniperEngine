@@ -118,7 +118,22 @@ namespace Juniper { namespace Panels {
 				}
 			}
 			if (ImGui::Button("Remove##Sprite")) {
-				scene.RemoveComponent<TransformComponent>(selectedEntity);
+				scene.RemoveComponent<SpriteComponent>(selectedEntity);
+			}
+		}
+		// Edit Tilemap
+		if (scene.HasComponents<TilemapComponent>(selectedEntity))
+		{
+			TilemapComponent& tilemap = scene.Get<TilemapComponent>(selectedEntity);
+			if (ImGui::CollapsingHeader("Tilemap", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (ImGui::Button("Add Tilemap"))
+				{
+					std::string tmxPath = Utils::OpenFileDialog();
+					tilemap.Tilemap = std::make_shared<Tilemap>(tmxPath);
+				}
+			}
+			if (ImGui::Button("Remove##Tilemap")) {
+				scene.RemoveComponent<TilemapComponent>(selectedEntity);
 			}
 		}
 

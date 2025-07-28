@@ -39,25 +39,31 @@ namespace Juniper {
 
 	void EditorLayer::OnAttach()
 	{
+		Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+
 		m_Shader = std::make_shared<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
 
 		auto& scene = m_App.GetActiveScene();
 		auto tilemap = scene.CreateEntity();
-
 		scene.AddComponent<TagComponent>(tilemap, "Tilemap");
 		scene.AddComponent<TransformComponent>(tilemap);
 		scene.AddComponent<TilemapComponent>(tilemap, std::make_shared<Tilemap>("res/tiling/testmap.tmx"));
+
+		auto sprite = scene.CreateEntity();
+		scene.AddComponent<TagComponent>(sprite, "Sprite");
+		scene.AddComponent<TransformComponent>(sprite);
+		scene.AddComponent<SpriteComponent>(sprite);
 	}
 
 	void EditorLayer::OnUpdate(float dt)
 	{
 		updateCamera(dt);
-
-		Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		
 		Renderer::Clear();
-
 		Renderer::BeginScene(m_Camera, m_Shader);
+
 		m_App.GetActiveScene().OnUpdate(dt);
+
 		Renderer::EndScene();
 	}
 

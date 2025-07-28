@@ -104,7 +104,6 @@ namespace Juniper {
 		int mapHeight = tilemap->GetHeight();
 		auto& layers = tilemap->GetLayers();
 
-		std::shared_ptr<Texture> currentTexture = nullptr;
 
 		for (int i = 0; i < layers.size(); ++i)
 		{
@@ -116,24 +115,18 @@ namespace Juniper {
 
 				auto& tile = layer.TileRegistry[index];
 
-                // TODO: Fix the root issue (texture switching causes artifacts)
-				if (currentTexture && tile.Texture->GetTexture() != currentTexture->GetTexture()) {
-					flush();
-					resetBatch();
-				}
-				currentTexture = tile.Texture;
 
 				float x = static_cast<float>(j % tilemap->GetWidth());
 				float y = static_cast<float>(mapHeight - (j / tilemap->GetWidth()) - 1);
 
 				auto& position = glm::vec3{ x, y, 0.0f } + translation;
 				auto& size = glm::vec2{ 1.0f, 1.0f };
-                std::array<glm::vec3, 4> positions = {
-                    position,
-                    { position.x + size.x, position.y, position.z },
-                    { position.x + size.x, position.y + size.y, position.z },
-                    { position.x, position.y + size.y, position.z },
-                };
+				std::array<glm::vec3, 4> positions = {
+					position,
+					{ position.x + size.x, position.y, position.z },
+					{ position.x + size.x, position.y + size.y, position.z },
+					{ position.x, position.y + size.y, position.z },
+				};
 
 				submitQuad(
 					positions,
@@ -211,6 +204,14 @@ namespace Juniper {
 
 	void Renderer::submitQuad(const std::array<glm::vec3, 4>& positions, const glm::vec4& color, const std::shared_ptr<Texture>& texture, const std::array<glm::vec2, 4>& texCoords)
 	{
+        // TODO: Workaround for artifact issue
+		static std::shared_ptr<Texture> currentTexture = nullptr;
+		if (currentTexture && (texture != currentTexture)) {
+			flush();
+			resetBatch();
+		}
+		currentTexture = texture;
+
 		s_Data.Stats.QuadCount++;
 
 		int existingSlot = -1;
