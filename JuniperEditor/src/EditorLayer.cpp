@@ -9,7 +9,7 @@ namespace Juniper {
 	EditorLayer::EditorLayer() :
 		Layer("Editor Layer"),
 		m_App(Application::Get()),
-		m_Camera(1.6f / 0.9f, 10.0f)
+		m_Camera(std::make_shared<OrthographicCamera>(1.6f / 0.9f, 10.0f))
 	{
 	}
 
@@ -77,19 +77,19 @@ namespace Juniper {
 	{
 		if (!m_App.GetWindow().IsCursorDisabled()) return;
 
-		float inc = m_CameraSpeed * m_Camera.GetZoom() * dt;
+		float inc = m_CameraSpeed * m_Camera->GetZoom() * dt;
 
 		if (Input::IsKeyPressed(JP_KEY_W))
-			m_Camera.Translate(glm::vec3(0.0f, 1.0f, 0.0f) * inc);
+			m_Camera->Translate(glm::vec3(0.0f, 1.0f, 0.0f) * inc);
 		if (Input::IsKeyPressed(JP_KEY_A))
-			m_Camera.Translate(glm::vec3(1.0f, 0.0f, 0.0f) * -inc);
+			m_Camera->Translate(glm::vec3(1.0f, 0.0f, 0.0f) * -inc);
 		if (Input::IsKeyPressed(JP_KEY_S))
-			m_Camera.Translate(glm::vec3(0.0f, 1.0f, 0.0f) * -inc);
+			m_Camera->Translate(glm::vec3(0.0f, 1.0f, 0.0f) * -inc);
 		if (Input::IsKeyPressed(JP_KEY_D))
-			m_Camera.Translate(glm::vec3(1.0f, 0.0f, 0.0f) * inc);
+			m_Camera->Translate(glm::vec3(1.0f, 0.0f, 0.0f) * inc);
 		if (Input::IsKeyPressed(JP_KEY_E))
-			m_Camera.SetZoom(m_Camera.GetZoom() - inc);
+			m_Camera->SetZoom(m_Camera->GetZoom() - inc);
 		if (Input::IsKeyPressed(JP_KEY_Q))
-			m_Camera.SetZoom(m_Camera.GetZoom() + inc);
+			m_Camera->SetZoom(m_Camera->GetZoom() + inc);
 	}
 }

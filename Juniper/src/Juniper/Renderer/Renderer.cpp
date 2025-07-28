@@ -26,7 +26,7 @@ namespace Juniper {
 
 	struct Data
 	{
-		glm::mat4 ViewProjection;
+		std::shared_ptr<OrthographicCamera> Camera;
 		std::shared_ptr<VertexArray> Vao;
 		std::shared_ptr<Shader> Shader;
 		std::shared_ptr<Texture> DefaultTexture;
@@ -82,14 +82,14 @@ namespace Juniper {
 			s_Data.slots[i] = i;
 	}
 
-	void Renderer::BeginScene(const OrthographicCamera& camera, const std::shared_ptr<Shader> shader)
+	void Renderer::BeginScene(const std::shared_ptr<OrthographicCamera>& camera, const std::shared_ptr<Shader> shader)
 	{
-		s_Data.ViewProjection = camera.GetViewProjectionMatrix();
+		s_Data.Camera = camera;
 		s_Data.Shader = shader;
 		resetBatch();
 
 		s_Data.Shader->Bind();
-		s_Data.Shader->setUniformMat4("u_ViewProjection", s_Data.ViewProjection);
+		s_Data.Shader->setUniformMat4("u_ViewProjection", camera->GetViewProjectionMatrix());
 		s_Data.Shader->setUniformMat4("u_Model", glm::mat4(1.0f));
 		s_Data.Shader->setUniformArrayi("u_Textures", static_cast<int>(MaxTextures), s_Data.slots);
 	}
@@ -204,6 +204,13 @@ namespace Juniper {
 
 	void Renderer::submitQuad(const std::array<glm::vec3, 4>& positions, const glm::vec4& color, const std::shared_ptr<Texture>& texture, const std::array<glm::vec2, 4>& texCoords)
 	{
+		// Cull the quad if all of its vertices are outside the camera frustum
+		if (std::none_of(positions.begin(), positions.end(), [](const glm::vec3& pos) {
+			return s_Data.Camera->IsVisible(pos);
+		})) {
+			return;
+		}
+
         // TODO: Workaround for artifact issue
 		static std::shared_ptr<Texture> currentTexture = nullptr;
 		if (currentTexture && (texture != currentTexture)) {

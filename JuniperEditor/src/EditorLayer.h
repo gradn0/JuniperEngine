@@ -21,7 +21,7 @@ namespace Juniper {
 	private:
 		Application& m_App;
 		
-		OrthographicCamera m_Camera;
+		std::shared_ptr<OrthographicCamera> m_Camera;
 		float m_CameraSpeed = 5.0f;
 		float m_MouseSensitivity = 0.1f;
 		float m_HasCameraUpdated = false;

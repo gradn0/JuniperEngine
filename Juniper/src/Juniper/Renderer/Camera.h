@@ -24,6 +24,16 @@ namespace Juniper {
 		void CalculateViewMatrix();
 		void CalculateProjectionMatrix();
 
+		bool IsVisible(const glm::vec3& worldPosition) const
+		{
+			glm::vec4 clipSpacePosition = m_ViewProjectionMatrix * glm::vec4(worldPosition, 1.0f);
+			glm::vec3 ndcPosition = glm::vec3(clipSpacePosition) / clipSpacePosition.w;
+
+			return ndcPosition.x >= -1.0f && ndcPosition.x <= 1.0f &&
+				ndcPosition.y >= -1.0f && ndcPosition.y <= 1.0f &&
+				ndcPosition.z >= -1.0f && ndcPosition.z <= 1.0f;
+		}
+
 	private:
 		glm::mat4 m_ProjectionMatrix;
 		glm::mat4 m_ViewMatrix{ 0.0f };

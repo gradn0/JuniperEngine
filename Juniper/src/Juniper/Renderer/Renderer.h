@@ -42,7 +42,7 @@ namespace Juniper {
 		static void Clear();
 		static void SetDepthMask(bool enabled);
 
-		static void BeginScene(const OrthographicCamera& camera, const std::shared_ptr<Shader> shader);
+		static void BeginScene(const std::shared_ptr<OrthographicCamera>& camera, const std::shared_ptr<Shader> shader);
 		static void EndScene();
 
 		static void SubmitQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color, const std::shared_ptr<Texture>& texture);
