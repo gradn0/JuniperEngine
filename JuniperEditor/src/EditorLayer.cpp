@@ -44,6 +44,7 @@ namespace Juniper {
 		m_Shader = std::make_shared<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
 
 		auto& scene = m_App.GetActiveScene();
+
 		auto tilemap = scene.CreateEntity();
 		scene.AddComponent<TagComponent>(tilemap, "Tilemap");
 		scene.AddComponent<TransformComponent>(tilemap);
@@ -53,6 +54,16 @@ namespace Juniper {
 		scene.AddComponent<TagComponent>(sprite, "Sprite");
 		scene.AddComponent<TransformComponent>(sprite);
 		scene.AddComponent<SpriteComponent>(sprite);
+
+		AnimationComponent animationComponent(
+			std::make_shared<Texture2D>("res/animations/soldier-attack.png"),
+			glm::vec2{ 0.0f, 0.0f },
+			glm::vec2{ 1.0f, 1.0f },
+			100.0f,
+			6,
+			0.1f
+		);
+		scene.AddComponent<AnimationComponent>(sprite, animationComponent);
 	}
 
 	void EditorLayer::OnUpdate(float dt)

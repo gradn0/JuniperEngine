@@ -42,4 +42,22 @@ namespace Juniper {
 		std::shared_ptr<Tilemap> Tilemap;
 	};
 
+	struct AnimationComponent
+	{
+		AnimationComponent(const std::shared_ptr<Texture2D>& spritesheet, glm::vec2 initialOffsetTiles, glm::vec2 sizeTiles, float tileSize, uint32_t frameCount, float frameTime, bool loop = true)
+			: FrameTime(frameTime), Loop(loop)
+		{
+			for (uint32_t i = 0; i < frameCount; ++i)
+			{
+				glm::vec2 offsetTiles = initialOffsetTiles + glm::vec2{ static_cast<float>(i) * sizeTiles.x, 0.0f };
+				Frames.emplace_back(std::make_shared<SubTexture2D>(spritesheet, offsetTiles, sizeTiles, tileSize));
+			}
+		}
+
+		std::vector<std::shared_ptr<SubTexture2D>> Frames;
+		float FrameTime = 0.1f;
+		float ElapsedTime = 0.0f;
+		uint32_t CurrentFrame = 0;
+		bool Loop;
+	};
 }
