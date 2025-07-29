@@ -16,9 +16,12 @@ namespace Juniper {
 	Application::Application(const WindowProps& props)
 	{
 		s_Instance = this;
+
 		m_Window = std::make_unique<Window>(props);
 		m_Window->SetEventCallBack(BIND_FN(OnEvent));
-		m_ImGuiLayer = std::make_unique<ImGuiLayer>();
+
+        m_ImGuiLayer = std::make_unique<ImGuiLayer>();
+
 		Renderer::Init();
 	}
 
